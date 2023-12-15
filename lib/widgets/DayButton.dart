@@ -45,16 +45,17 @@ class _DayButtonState extends State<DayButton> {
             Text(
               DateFormat.E('ru').format(widget.date),
               style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : Colors.black,
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: isSelected ? Colors.white : const Color(0xff333333),
               ),
             ),
             Text(
               DateFormat.d().format(widget.date),
               style: TextStyle(
-                fontSize: 12,
-                color: isSelected ? Colors.white : Colors.black,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: isSelected ? Colors.white : const Color(0xff333333),
               ),
             ),
           ],

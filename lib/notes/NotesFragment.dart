@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 import 'package:intl/date_symbol_data_local.dart';
+
+import 'NoteCreationDialog.dart';
 
 class NotesFragment extends StatefulWidget {
   @override
@@ -18,12 +21,12 @@ class _NotesFragmentState extends State<NotesFragment> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Заметки"),
+          Text("Заметки", style: AppTextStyle.headerTextStyle,),
           Padding(
             padding: EdgeInsets.fromLTRB(16, 85, 16, 0),
             child: Image.asset('assets/notes/note_image.png'),
           ),
-          Text('Заметок пока нет - можешь их создать'),
+          Text('Заметок пока нет - можешь их создать',style: AppTextStyle.mainTextStyle,),
           Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 0, 0),
             child: GestureDetector(
@@ -38,11 +41,7 @@ class _NotesFragmentState extends State<NotesFragment> {
                   child: Center(
                     child: Text(
                       'Создать',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTextStyle.headerTextStyle,
                     ),
                   ),
                 )),
@@ -54,5 +53,9 @@ class _NotesFragmentState extends State<NotesFragment> {
 
   void onCreatePressed() {
     print('Кнопка "Создать" нажата');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => NoteCreationDialog()),
+    );
   }
 }

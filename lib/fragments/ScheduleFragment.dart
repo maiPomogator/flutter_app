@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -24,6 +25,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
 
   @override
   Widget build(BuildContext context) {
+
     DateTime currentDate = DateTime.now();
     DateTime monday =
         currentDate.subtract(Duration(days: currentDate.weekday - 1));
@@ -32,77 +34,101 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
         List.generate(7, (index) => monday.add(Duration(days: index)));
 
     const buttonWidth = 30.0;
-    // Calculate total spacing needed
     double totalSpacing =
         MediaQuery.of(context).size.width - (weekDates.length * buttonWidth);
+    double spacing = totalSpacing / (weekDates.length + 2);
 
-    // Calculate the space between buttons
-    double spacing = totalSpacing / (weekDates.length - 1);
+    return GestureDetector(
+      onHorizontalDragEnd: (DragEndDetails details) {
+        double dx = details.primaryVelocity ?? 0;
+        double sensitivity = 1.0;
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildGroupDropdown(),
-        SizedBox(
-          height: 35,
-          child: Row(
-            children: [
-              Text(
-                DateFormat('d MMMM', 'ru').format(currentDate),
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 12,
-                ),
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: () => _selectDate(context),
-                icon: const Icon(Icons.calendar_month,
-                    color: Color(0xFF2C4A60), size: 24),
-              )
-            ],
+        if (dx > sensitivity) {
+          _updateSelectedDate(_selectedDate.subtract(Duration(days: 1)));
+        } else if (dx < -sensitivity) {
+          _updateSelectedDate(_selectedDate.add(Duration(days: 1)));
+        }
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(top: 46),
+            child: _buildGroupDropdown(),
           ),
-        ),
-        Container(
-          width: MediaQuery.of(context).size.width, // Full width of the screen
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+          SizedBox(
+            height: 35,
             child: Row(
               children: [
-                for (int i = 0; i < weekDates.length; i++)
-                  i == weekDates.length - 1
-                      ? ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minWidth: 30,
-                            minHeight: 57,
-                          ),
-                          child: DayButton(
-                            date: weekDates[i],
-                            selectedDate: _selectedDate,
-                            onDateSelected: _onDateSelected,
-                          ),
-                        )
-                      : Row(
-                          children: [
-                            ConstrainedBox(
-                              constraints: BoxConstraints(
-                                minWidth: 30,
-                                minHeight: 57,
-                              ),
-                              child: DayButton(
-                                date: weekDates[i],
-                                selectedDate: _selectedDate,
-                                onDateSelected: _onDateSelected,
-                              ),
-                            ),
-                            Spacing(width: spacing),
-                          ],
-                        ),
+                Text(
+                  DateFormat('d MMMM', 'ru').format(currentDate),
+                  style: AppTextStyle.secondTextStyle,
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => _selectDate(context),
+                  icon: const Icon(Icons.calendar_month,
+                      color: Color(0xFF2C4A60), size: 24),
+                )
               ],
             ),
           ),
-        ),
-      ],
+          Container(
+            width: MediaQuery.of(context).size.width,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (int i = 0; i < weekDates.length; i++)
+                    i == weekDates.length - 1
+                        ? ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth: 30,
+                              minHeight: 57,
+                            ),
+                            child: DayButton(
+                              date: weekDates[i],
+                              selectedDate: _selectedDate,
+                              onDateSelected: _onDateSelected,
+                            ),
+                          )
+                        : Row(
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minWidth: 30,
+                                  minHeight: 57,
+                                ),
+                                child: DayButton(
+                                  date: weekDates[i],
+                                  selectedDate: _selectedDate,
+                                  onDateSelected: _onDateSelected,
+                                ),
+                              ),
+                              Spacing(width: spacing),
+                            ],
+                          ),
+                ],
+              ),
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 59),
+              child: Image.asset('assets/schedule/meditation.png'),
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Text(
+                'Сегодня занятий нет - можно и отдохнуть',
+                style: AppTextStyle.mainTextStyle,
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -142,37 +168,62 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
   }
 
   Widget _buildGroupDropdown() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 30, 16, 0),
-      child: DropdownButton<String>(
-        value: _selectedGroup,
-        onChanged: (String? selectedGroup) {
-          if (selectedGroup != null) {
-            _onGroupChanged(selectedGroup);
-          }
-        },
-        items: [
-          DropdownMenuItem(
-            value: "М3О-435Б-20",
-            child: Text("М3О-435Б-20"),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      // Align the dropdown in the center horizontally
+      children: [
+        DropdownButton<String>(
+          value: _selectedGroup,
+          onChanged: (String? selectedGroup) {
+            if (selectedGroup != null) {
+              _onGroupChanged(selectedGroup);
+            }
+          },
+          items: [
+            DropdownMenuItem(
+              value: "М3О-435Б-20",
+              child: Text("М3О-435Б-20"),
+            ),
+            DropdownMenuItem(
+              value: "М3З-228М-25",
+              child: Text("М3З-228М-25"),
+            ),
+          ],
+          icon: Icon(
+            Icons.arrow_drop_down,
+            color: Colors.black, // Adjust the color as needed
           ),
-          DropdownMenuItem(
-            value: "М3З-228М-25",
-            child: Text("М3З-228М-25"),
-          ),
-        ],
-        isExpanded: true,
-        underline: Container(
-          height: 2,
-          color: Theme.of(context).colorScheme.secondary,
+          isExpanded: false,
+          underline: Container(),
+          // Remove the underline
+          selectedItemBuilder: (BuildContext context) {
+            return [
+              DropdownMenuItem(
+                value: _selectedGroup,
+                child: Text(
+                  _selectedGroup,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black, // Adjust the color as needed
+                  ),
+                ),
+              ),
+            ];
+          },
         ),
-      ),
+      ],
     );
   }
 
   void _onGroupChanged(String selectedGroup) {
     setState(() {
       _selectedGroup = selectedGroup;
+    });
+  }
+
+  void _updateSelectedDate(DateTime newDate) {
+    setState(() {
+      _selectedDate = newDate;
     });
   }
 }

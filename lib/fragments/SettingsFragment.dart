@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 
 class SettingsFragment extends StatefulWidget {
   @override
@@ -6,21 +7,6 @@ class SettingsFragment extends StatefulWidget {
 }
 
 class _SettingsFragmentState extends State<SettingsFragment> {
-  final TextStyle headerTextStyle = const TextStyle(
-      fontSize: 16,
-      fontFamily: 'Roboto',
-      fontWeight: FontWeight.w500,
-      color: Color(0xFF1D1B20));
-  final TextStyle mainTextStyle = const TextStyle(
-      fontSize: 16,
-      fontFamily: 'Roboto',
-      fontWeight: FontWeight.w400,
-      color: Color(0xDE000000));
-  final TextStyle secondTextStyle = const TextStyle(
-      fontSize: 12,
-      fontFamily: 'Roboto',
-      fontWeight: FontWeight.w400,
-      color: Color(0x99000000));
 
   @override
   Widget build(BuildContext context) {
@@ -32,159 +18,107 @@ class _SettingsFragmentState extends State<SettingsFragment> {
             padding: EdgeInsets.only(top: 46),
             child: Text(
               "Настройки",
-              style: headerTextStyle,
+              style: AppTextStyle.headerTextStyle,
             ),
           ),
         ),
         Padding(
           padding: EdgeInsets.only(top: 24),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Color(0xFF21212114),
-                  width: 1.0,
-                ),
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 16,
-                ),
-                Image.asset('assets/settings/star.png'),
-                Padding(
-                    padding: EdgeInsets.only(left: 12, bottom: 15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Избранное расписания',
-                          style: mainTextStyle,
-                        ),
-                        Text(
-                          'десь будет выбранное',
-                          style: secondTextStyle,
-                        ),
-                      ],
-                    ))
-              ],
-            ),
+          child: buildSettingsItem(
+            'star',
+            'Избранное расписания',
+            'десь будет выбранное',
           ),
         ),
         Padding(
           padding: EdgeInsets.only(top: 16),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Color(0xFF21212114),
-                  width: 1.0,
-                ),
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 16,
-                ),
-                Image.asset('assets/settings/theme.png'),
-                Padding(
-                    padding: EdgeInsets.only(left: 12, bottom: 15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Тема',
-                          style: mainTextStyle,
-                        ),
-                        Text(
-                          'десь будет выбранное',
-                          style: secondTextStyle,
-                        ),
-                      ],
-                    ))
-              ],
-            ),
+          child: buildSettingsItem(
+            'theme',
+            'Тема',
+            'десь будет выбранное',
           ),
         ),
         Padding(
           padding: EdgeInsets.only(top: 16),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Color(0xFF21212114),
-                  width: 1.0,
-                ),
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 16,
-                ),
-                Image.asset('assets/settings/telegram.png'),
-                Padding(
-                    padding: EdgeInsets.only(left: 12, bottom: 15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Привязать телеграм',
-                          style: mainTextStyle,
-                        ),
-                        Text(
-                          'десь будет выбранное',
-                          style: secondTextStyle,
-                        ),
-                      ],
-                    ))
-              ],
-            ),
+          child: buildSettingsItem(
+            'telegram',
+            'Привязать телеграм',
+            'десь будет выбранное',
           ),
         ),
         Padding(
           padding: EdgeInsets.only(top: 16),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Color(0xFF21212114),
-                  width: 1.0,
-                ),
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 16,
-                ),
-                Image.asset('assets/settings/backup.png'),
-                Padding(
-                    padding: EdgeInsets.only(left: 12, bottom: 15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Импорт/экспорт данных',
-                          style: mainTextStyle,
-                        ),
-                        Text(
-                          'Перенос данных между устройствами',
-                          style: secondTextStyle,
-                        ),
-                      ],
-                    ))
-              ],
-            ),
+          child: buildSettingsItem(
+            'backup',
+            'Импорт/экспорт данных',
+            'Перенос данных между устройствами',
           ),
         ),
       ],
+    );
+  }
+
+  void handleButtonTap(String buttonName) {
+    switch (buttonName) {
+      case 'star':
+
+        break;
+      case 'theme':
+
+        break;
+      case 'telegram':
+
+        break;
+      case 'backup':
+
+        break;
+      default:
+        break;
+    }
+  }
+
+  Widget buildSettingsItem(
+    String imageName,
+    String title,
+    String subtitle,
+  ) {
+    return GestureDetector(
+      onTap: () => handleButtonTap(imageName),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: Color(0xFF21212114),
+              width: 1.0,
+            ),
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 16,
+            ),
+            Image.asset('assets/settings/$imageName.png'),
+            Padding(
+              padding: EdgeInsets.only(left: 12, bottom: 15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyle.mainTextStyle,
+                  ),
+                  Text(
+                    subtitle,
+                    style: AppTextStyle.secondTextStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
