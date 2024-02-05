@@ -1,19 +1,31 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_mobile_client/model/Group.dart';
 import 'package:flutter_mobile_client/model/GroupType.dart';
-import 'database/GroupDatabaseHelper.dart';
+import 'data/GroupDatabaseHelper.dart';
+import 'data/UserPreferences.dart';
 import 'notes/NotesFragment.dart';
 import 'fragments/ScheduleFragment.dart';
 import 'fragments/SettingsFragment.dart';
 
 Future<void> main() async {
   //debugPaintSizeEnabled = true;
+  await dotenv.load();
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await UserPreferences.init();
   runApp(const MyApp());
   GroupDatabaseHelper dbHelper = GroupDatabaseHelper();
 
-  Group group1 = Group(id: 1, name: 'М3О', course: 2, faculty: 2, type: GroupType.BACHELOR, isMain: true);
+  Group group1 = Group(
+      id: 1,
+      name: 'М3О',
+      course: 2,
+      faculty: 2,
+      type: GroupType.BACHELOR,
+      isMain: true);
   await dbHelper.insertGroup(group1);
 }
 

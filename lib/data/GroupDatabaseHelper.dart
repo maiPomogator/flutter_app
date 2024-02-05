@@ -47,5 +47,4 @@ class GroupDatabaseHelper {
       return Group.fromMap(maps[i]);
     });
   }
-  Future<Group> getMainGroup
 }

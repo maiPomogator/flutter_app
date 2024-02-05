@@ -1,5 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_mobile_client/data/UserPreferences.dart';
 import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsFragment extends StatefulWidget {
   @override
@@ -7,7 +11,6 @@ class SettingsFragment extends StatefulWidget {
 }
 
 class _SettingsFragmentState extends State<SettingsFragment> {
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -43,7 +46,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
           child: buildSettingsItem(
             'telegram',
             'Привязать телеграм',
-            'десь будет выбранное',
+            UserPreferences.getIsAuth() ? 'Привязано' : 'Не привязано',
           ),
         ),
         Padding(
@@ -58,19 +61,48 @@ class _SettingsFragmentState extends State<SettingsFragment> {
     );
   }
 
-  void handleButtonTap(String buttonName) {
+  Future<void> handleButtonTap(String buttonName) async {
     switch (buttonName) {
       case 'star':
-
         break;
       case 'theme':
-
         break;
       case 'telegram':
+        final String botUserName = dotenv.env['BOT_NAME'] ?? '';
+        Uri? url;
+        String message = 'кал';
+        try {
+          if (message != null && message != '') {
+            url = Uri.parse('https://t.me/$botUserName?start=uuid');
+          } else {
+            url = Uri.parse('https://t.me/$botUserName');
+          }
+          launchUrl(
+            url,
+            mode: LaunchMode.externalNonBrowserApplication,
+            webOnlyWindowName: botUserName,
+            webViewConfiguration: const WebViewConfiguration(
+              headers: <String, String>{
+                'User-Agent': 'Telegram',
+              },
+            ),
+          );
+          if (kDebugMode) {
+            if (message != null && message != '') {
+              print(
+                  '\x1B[32mSending message to $botUserName...\nMessage: $message\x1B[0m\nURL: https://t.me/$botUserName?text=${Uri.encodeFull(message)}');
+            } else {
+              print('\x1B[32mSending message to $botUserName...\x1B[0m');
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('\x1B[31mSending failed!\nError: $e\x1B[0m');
+          }
+        }
 
         break;
       case 'backup':
-
         break;
       default:
         break;
