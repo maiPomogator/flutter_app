@@ -43,6 +43,8 @@ dependencies:
   http: ^0.13.6
   url_launcher: ^6.2.4
   telegram: ^0.0.3
+  path: ^1.8.3
+  sqflite: ^2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -55,7 +57,6 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
   uuid: ^4.2.2
-  sqflite: ^2.0.0
   shared_preferences: ^2.0.12
 
 # For information on the generic Dart part of this file, see the

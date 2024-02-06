@@ -1,103 +1,73 @@
+import 'dart:ui';
+
 import '../model/Lesson.dart';
 import '../model/Note.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'LessonsDatabase.dart';
+
 class NoteDatabase {
-  static final NoteDatabase instance = NoteDatabase._init();
+  late Database _database;
 
-  static Database? _database;
-
-  NoteDatabase._init();
-
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-
-    _database = await _initDB('notes.db');
-    return _database!;
-  }
-
-  Future<Database> _initDB(String filePath) async {
-    final documentsDirectory = await getApplicationDocumentsDirectory();
-    final path = join(documentsDirectory.path, filePath);
-
-    return await openDatabase(path, version: 1, onCreate: _createDB);
-  }
-
-  Future<void> _createDB(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE notes(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        targetTimestamp TEXT,
-        title TEXT,
-        text TEXT,
-        color INTEGER,
-        isCompleted INTEGER,
-        lessonId INTEGER
-      )
-    ''');
-  }
-
-  Future<Note> createNote(Note note) async {
-    final db = await instance.database;
-    final id = await db.insert('notes', note.toMap());
-    return note.copy(id: id);
-  }
-
-  Future<Note> readNote(int id) async {
-    final db = await instance.database;
-    final maps = await db.query(
-      'notes',
-      columns: NoteFields.values,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-
-    if (maps.isNotEmpty) {
-      return Note.fromMap(maps.first);
-    } else {
-      throw Exception('Note $id not found');
-    }
-  }
-
-  Future<List<Note>> readAllNotes() async {
-    final db = await instance.database;
-    final result = await db.query('notes', orderBy: 'targetTimestamp DESC');
-    return result.map((map) => Note.fromMap(map)).toList();
-  }
-
-  Future<void> updateNote(Note note) async {
-    final db = await instance.database;
-    await db.update(
-      'notes',
-      note.toMap(),
-      where: 'id = ?',
-      whereArgs: [note.id],
+  Future<Database> openNoteDatabase() async {
+    final path = '${await getDatabasesPath()}notes_database.db';
+    return await openDatabase(
+      path,
+      onCreate: (db, version) {
+        return db.execute(
+          '''
+          CREATE TABLE notes(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            targetTimestamp TEXT,
+            title TEXT,
+            text TEXT,
+            color INTEGER,
+            isCompleted INTEGER,
+            lessonId INTEGER
+          )
+          ''',
+        );
+      },
+      version: 1,
     );
   }
 
-  Future<void> deleteNote(int id) async {
-    final db = await instance.database;
-    await db.delete(
-      'notes',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+
+
+  Future<void> initializeDatabase() async {
+    _database = await openNoteDatabase();
   }
 
-  Future<void> close() async {
-    final db = await instance.database;
-    db.close();
+  Future<int> insertNote(Note note) async {
+    await openNoteDatabase();
+    return await _database.insert('notes', note.toMap());
   }
-}
 
-extension NoteFields on String {
-  static final List<String> values = [
-    'id',
-    'targetTimestamp',
-    'title',
-    'text',
-    'color',
-    'isCompleted',
-    'lessonId',
-  ];
+  Future<List<Note>> getNotes() async {
+    LessonsDatabase database = LessonsDatabase();
+    await openNoteDatabase();
+    final List<Map<String, dynamic>> maps = await _database.query('notes');
+    return List.generate(maps.length, (i) {
+      return Note(
+         maps[i]['id'],
+         DateTime.parse(maps[i]['targetTimestamp']),
+         maps[i]['title'],
+         maps[i]['text'],
+         Color(maps[i]['color']),
+         maps[i]['isCompleted'] == 1,
+         database.getLessonById(maps[i]['lessonId']) as Lesson?,
+      );
+    });
+  }
+
+  Future<int> updateNote(Note note) async {
+    await openNoteDatabase();
+    return await _database.update('notes', note.toMap(),
+        where: 'id = ?', whereArgs: [note.id]);
+  }
+
+  Future<int> deleteNote(int id) async {
+    await openNoteDatabase();
+    return await _database.delete('notes', where: 'id = ?', whereArgs: [id]);
+  }
 }

@@ -47,4 +47,14 @@ class GroupDatabaseHelper {
       return Group.fromMap(maps[i]);
     });
   }
+
+  Future<Group> getGroupById(int id) async {
+    final Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(
+      tableName,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return Group.fromMap(maps.first);
+  }
 }
