@@ -2,11 +2,12 @@ import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_mobile_client/data/NoteDatabase.dart';
 import 'package:flutter_mobile_client/model/Group.dart';
 import 'package:flutter_mobile_client/model/GroupType.dart';
 import 'data/GroupDatabaseHelper.dart';
 import 'data/UserPreferences.dart';
-import 'notes/NotesFragment.dart';
+import 'fragments/NotesFragment.dart';
 import 'fragments/ScheduleFragment.dart';
 import 'fragments/SettingsFragment.dart';
 
@@ -16,6 +17,7 @@ Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   await UserPreferences.init();
+  await NoteDatabase.instance.initializeDatabase();
   runApp(const MyApp());
   GroupDatabaseHelper dbHelper = GroupDatabaseHelper();
 
@@ -94,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
           fem: fem,
         );
       case 1:
-        return NotesFragment();
+        return NotesFragment(fem: fem,);
       case 2:
         return SettingsFragment();
       default:

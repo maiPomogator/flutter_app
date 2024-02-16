@@ -25,7 +25,7 @@ class Group {
       'name': name,
       'course': course,
       'faculty': faculty,
-      'type': type.toString(), // or type.name, depending on your GroupType implementation
+      'type': type.toString(),
       'isMain': isMain ? 1 : 0,
     };
   }

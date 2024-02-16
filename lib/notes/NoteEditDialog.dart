@@ -6,21 +6,36 @@ import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 
 import '../model/Note.dart';
 
-class NoteCreationDialog extends StatefulWidget {
+class NoteEditDialog extends StatefulWidget {
+  final Note note;
   final DateTime currentDate;
+  final Function() onUpdate;
 
-  NoteCreationDialog({required this.currentDate});
+  NoteEditDialog({required this.currentDate, required this.note, required this.onUpdate,});
 
   @override
-  _NoteCreationDialogState createState() => _NoteCreationDialogState();
+  _NoteEditDialogState createState() => _NoteEditDialogState();
 }
 
-class _NoteCreationDialogState extends State<NoteCreationDialog> {
+class _NoteEditDialogState extends State<NoteEditDialog> {
   Color selectedPriorityColor = Colors.transparent;
   bool _switchValue = true;
   TextEditingController _labelFieldController = TextEditingController();
   TextEditingController _textFieldController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
 
+    // Инициализация переменных при первом создании виджета
+    _labelFieldController.text = widget.note.title;
+    _textFieldController.text = widget.note.text;
+    if (widget.note.color == Color(0xFFE9EEF3)) {
+      selectedPriorityColor = Colors.transparent;
+    } else {
+      selectedPriorityColor = widget.note.color;
+    }
+    _switchValue = widget.note.isImportant;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +46,8 @@ class _NoteCreationDialogState extends State<NoteCreationDialog> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text('Создание заметки', style: AppTextStyle.headerTextStyle),
+        title:
+            Text('Редактирование заметки', style: AppTextStyle.headerTextStyle),
         centerTitle: true,
       ),
       body: Padding(
@@ -101,30 +117,30 @@ class _NoteCreationDialogState extends State<NoteCreationDialog> {
                 PriorityCircle(
                   icon: Icons.circle,
                   color: Colors.red,
-                  isSelected: selectedPriorityColor == Colors.red,
+                  isSelected: selectedPriorityColor == Color(0xfff44336),
                   onTap: () {
                     setState(() {
-                      selectedPriorityColor = Colors.red;
+                      selectedPriorityColor = Color(0xfff44336);
                     });
                   },
                 ),
                 PriorityCircle(
                   icon: Icons.circle,
                   color: Colors.green,
-                  isSelected: selectedPriorityColor == Colors.green,
+                  isSelected: selectedPriorityColor == Color(0xff4caf50),
                   onTap: () {
                     setState(() {
-                      selectedPriorityColor = Colors.green;
+                      selectedPriorityColor = Color(0xff4caf50);
                     });
                   },
                 ),
                 PriorityCircle(
                   icon: Icons.circle,
                   color: Colors.blue,
-                  isSelected: selectedPriorityColor == Colors.blue,
+                  isSelected: selectedPriorityColor == Color(0xff2196f3),
                   onTap: () {
                     setState(() {
-                      selectedPriorityColor = Colors.blue;
+                      selectedPriorityColor = Color(0xff2196f3);
                     });
                   },
                 ),
@@ -152,25 +168,44 @@ class _NoteCreationDialogState extends State<NoteCreationDialog> {
             ),
             Spacer(),
             Padding(
-              padding: EdgeInsets.only(bottom: 20),
-              child: GestureDetector(
-                onTap: onSavePressed,
-                child: Container(
-                  width: 335,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE9EEF3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Сохранить',
-                      style: AppTextStyle.headerTextStyle,
+                padding: EdgeInsets.only(bottom: 20),
+                child: Row(children: [
+                  GestureDetector(
+                    onTap: onSavePressed,
+                    child: Container(
+                      width: 165,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE9EEF3),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Сохранить',
+                          style: AppTextStyle.headerTextStyle,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
+                  Spacer(),
+                  GestureDetector(
+                    onTap: onDeletePressed,
+                    child: Container(
+                      width: 165,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE9EEF3),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Удалить',
+                          style: AppTextStyle.headerTextStyle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ])),
           ],
         ),
       ),
@@ -179,6 +214,7 @@ class _NoteCreationDialogState extends State<NoteCreationDialog> {
 
   void onSavePressed() async {
     print('Кнопка "Сохранить" нажата');
+    await NoteDatabase.instance.deleteNote(widget.note.id);
     if (_labelFieldController.text.isNotEmpty &&
         _textFieldController.text.isNotEmpty) {
       Note newNote = Note(
@@ -195,10 +231,17 @@ class _NoteCreationDialogState extends State<NoteCreationDialog> {
           null);
       await NoteDatabase.instance.insertNote(newNote);
       Navigator.of(context).pop();
+      widget.onUpdate();
     } else {
       ErrorDialog.showError(context, 'Проверьте данные',
           'Проверьте заполнение поля Заголовок или основного текста');
     }
+  }
+
+  void onDeletePressed() async {
+    await NoteDatabase.instance.deleteNote(widget.note.id);
+    Navigator.of(context).pop();
+    widget.onUpdate();
   }
 }
 

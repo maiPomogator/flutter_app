@@ -25,7 +25,6 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
 
   @override
   Widget build(BuildContext context) {
-
     DateTime currentDate = DateTime.now();
     DateTime monday =
         currentDate.subtract(Duration(days: currentDate.weekday - 1));
@@ -112,24 +111,96 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
               ),
             ),
           ),
-          Center(
-            child: Padding(
-              padding: EdgeInsets.only(top: 59),
-              child: Image.asset('assets/schedule/meditation.png'),
-            ),
-          ),
-          Center(
-            child: Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: Text(
-                'Сегодня занятий нет - можно и отдохнуть',
-                style: AppTextStyle.mainTextStyle,
-              ),
-            ),
-          )
+          _selectedDate.day == DateTime.now().day
+              ? Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 57,
+                          height: 22,
+                          decoration: BoxDecoration(color: Color(0xFFE9EEF3),
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(99),
+                            bottomRight: Radius.circular(99),
+                          ),),
+                          child: Center(
+                            child: Text('1'),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 16),
+                          child: Text('10:45 - 12:15'),
+                        ),
+                        Spacer(),
+                        Padding(
+                          padding: EdgeInsets.only(right: 10),
+                          child: ImageIcon(
+                            AssetImage('assets/navigation/note_icon.png'),
+                            size: 24,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                        decoration: BoxDecoration(
+                          color: Color(0xffE9EEF3),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        margin: EdgeInsets.symmetric(horizontal: 18),
+                        padding: EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Информационная безопасность',
+                              style: AppTextStyle.headerTextStyle,
+                            ),
+                            Text(
+                              'Лекция',
+                              style: AppTextStyle.mainTextStyle,
+                            ),
+                            Text(
+                              'М3О-435Б-20',
+                              style: AppTextStyle.secondTextStyle,
+                            ),
+                            Text(
+                              'Коновалов Кирилл Андреевич',
+                              style: AppTextStyle.secondTextStyle,
+                            ),
+                            Text(
+                              '404В',
+                              style: AppTextStyle.secondTextStyle,
+                            ),
+                          ],
+                        )
+                    ),
+                  ],
+                )
+              : noPairs()
         ],
       ),
     );
+  }
+
+  Widget noPairs() {
+    return Column(children: [
+      Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 59),
+          child: Image.asset('assets/schedule/meditation.png'),
+        ),
+      ),
+      Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 8),
+          child: Text(
+            'Сегодня занятий нет - можно и отдохнуть',
+            style: AppTextStyle.mainTextStyle,
+          ),
+        ),
+      )
+    ]);
   }
 
   void _onDateSelected(DateTime date) {

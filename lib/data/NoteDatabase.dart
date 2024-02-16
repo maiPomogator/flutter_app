@@ -9,9 +9,19 @@ import 'LessonsDatabase.dart';
 class NoteDatabase {
   late Database _database;
 
-  Future<Database> openNoteDatabase() async {
+  // Приватный конструктор
+  NoteDatabase._privateConstructor();
+
+  // Единственный экземпляр класса NoteDatabase
+  static final NoteDatabase _instance = NoteDatabase._privateConstructor();
+
+  // Публичный статический метод, чтобы получить экземпляр класса NoteDatabase
+  static NoteDatabase get instance => _instance;
+
+  // Метод инициализации базы данных
+  Future<void> initializeDatabase() async {
     final path = '${await getDatabasesPath()}notes_database.db';
-    return await openDatabase(
+    _database = await openDatabase(
       path,
       onCreate: (db, version) {
         return db.execute(
@@ -23,6 +33,7 @@ class NoteDatabase {
             text TEXT,
             color INTEGER,
             isCompleted INTEGER,
+            isImportant INTEGER,
             lessonId INTEGER
           )
           ''',
@@ -32,42 +43,91 @@ class NoteDatabase {
     );
   }
 
-
-
-  Future<void> initializeDatabase() async {
-    _database = await openNoteDatabase();
-  }
-
   Future<int> insertNote(Note note) async {
-    await openNoteDatabase();
-    return await _database.insert('notes', note.toMap());
+    return await _database.insert('notes', note.toMap(excludeId: true));
   }
+
 
   Future<List<Note>> getNotes() async {
-    LessonsDatabase database = LessonsDatabase();
-    await openNoteDatabase();
     final List<Map<String, dynamic>> maps = await _database.query('notes');
-    return List.generate(maps.length, (i) {
-      return Note(
-         maps[i]['id'],
-         DateTime.parse(maps[i]['targetTimestamp']),
-         maps[i]['title'],
-         maps[i]['text'],
-         Color(maps[i]['color']),
-         maps[i]['isCompleted'] == 1,
-         database.getLessonById(maps[i]['lessonId']) as Lesson?,
-      );
-    });
+    List<Note> notes = [];
+    for (var map in maps) {
+      Lesson? lesson;
+      if (map['lessonId'] != null) {
+        lesson = await LessonsDatabase().getLessonById(map['lessonId']);
+      }
+      notes.add(Note(
+        map['id'],
+        DateTime.parse(map['targetTimestamp']),
+        map['title'],
+        map['text'],
+        Color(map['color']),
+        map['isCompleted'] == 1 ? true : false,
+        map['isImportant'] == 1 ? true : false,
+        lesson,
+      ));
+    }
+    return notes;
   }
 
+
   Future<int> updateNote(Note note) async {
-    await openNoteDatabase();
-    return await _database.update('notes', note.toMap(),
-        where: 'id = ?', whereArgs: [note.id]);
+    return await _database
+        .update('notes', note.toMap(), where: 'id = ?', whereArgs: [note.id]);
   }
 
   Future<int> deleteNote(int id) async {
-    await openNoteDatabase();
     return await _database.delete('notes', where: 'id = ?', whereArgs: [id]);
   }
+
+  Future<List<Note>> getNotesWithLessonId() async {
+    final List<Map<String, dynamic>> maps = await _database.query(
+      'notes',
+      where: 'lessonId IS NOT NULL',
+    );
+    return _extractNotesFromMapList(maps);
+  }
+
+  Future<List<Note>> getNotesWithoutLessonId() async {
+    final List<Map<String, dynamic>> maps = await _database.query(
+      'notes',
+      where: 'lessonId IS NULL',
+    );
+    return _extractNotesFromMapList(maps);
+  }
+
+  Future<List<Note>> _extractNotesFromMapList(List<Map<String, dynamic>> maps) async {
+    List<Note> notes = [];
+    for (var map in maps) {
+      final Lesson? lesson = await _getLessonById(map['lessonId']);
+      notes.add(Note(
+        map['id'],
+        DateTime.parse(map['targetTimestamp']),
+        map['title'],
+        map['text'],
+        Color(map['color']),
+        map['isCompleted'] == 1 ? true : false,
+        map['isImportant'] == 1 ? true : false,
+        lesson,
+      ));
+    }
+    return notes;
+  }
+
+  Future<Lesson?> _getLessonById(int? lessonId) async {
+    if (lessonId != null) {
+      return await LessonsDatabase().getLessonById(lessonId);
+    }
+    return null;
+  }
+  Future<List<Note>> getNotesByDate(DateTime date) async {
+    final formattedDate = date.toIso8601String().substring(0, 10);
+    final List<Map<String, dynamic>> maps = await _database.query(
+      'notes',
+      where: 'substr(targetTimestamp, 1, 10) = ?',
+      whereArgs: [formattedDate],
+    );
+    return _extractNotesFromMapList(maps);
+  }
+
 }

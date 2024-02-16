@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'package:flutter_mobile_client/model/LessonType.dart';
 
 import '../data/GroupDatabaseHelper.dart';
@@ -8,7 +9,7 @@ import 'LessonStatus.dart';
 import 'Professor.dart';
 
 class Lesson {
-  final Long id;
+  final int id;
   final String name;
   final List<LessonType> types;
   final DateTime day;
@@ -60,35 +61,58 @@ class Lesson {
 
   static List<LessonType> typeFromString(String data) {
     data = data.replaceAll('[', '').replaceAll(']', '');
-    List<LessonType> roomsList = data.split(', ').map((String s) => s).toList();
-    return roomsList;
+    List<String> typeNames = data.split(', ');
+    List<LessonType> lessonTypes = [];
+    for (var typeName in typeNames) {
+      switch (typeName) {
+        case "Лекция":
+          lessonTypes.add(LessonType.LECTURE);
+          break;
+        case "Практическое занятие":
+          lessonTypes.add(LessonType.PRACTICE);
+          break;
+        case "Лабораторная работа":
+          lessonTypes.add(LessonType.LABORATORY);
+          break;
+        case "Консультация":
+          lessonTypes.add(LessonType.CONSULTATION);
+          break;
+        case "Зачёт":
+          lessonTypes.add(LessonType.CREDIT);
+          break;
+        case "Экзамен":
+          lessonTypes.add(LessonType.EXAM);
+          break;
+        default:
+        // Handle unrecognized lesson type
+          break;
+      }
+    }
+    return lessonTypes;
   }
+
 
   static Future<Set<Group>> groupsFromString(String data) async {
     GroupDatabaseHelper databaseHelper = GroupDatabaseHelper();
     data = data.replaceAll('[', '').replaceAll(']', '');
     List<int> groupIds = data.split(', ').map((String s) => int.parse(s)).toList();
 
-    // Создаем список будущих объектов Group
     List<Future<Group>> futureGroups = groupIds.map((id) => databaseHelper.getGroupById(id)).toList();
 
-    // Ожидаем завершения всех асинхронных операций
     List<Group> groupsList = await Future.wait(futureGroups);
 
     return groupsList.toSet();
   }
 
 
-  static Future<Set<Group>> professorsFromString(String data) async {
-    GroupDatabaseHelper databaseHelper = GroupDatabaseHelper();
+  static Future<Set<Professor>> professorsFromString(String data) async {
+    ProfessorDatabase databaseHelper = ProfessorDatabase();
     data = data.replaceAll('[', '').replaceAll(']', '');
     List<int> groupIds = data.split(', ').map((String s) => int.parse(s)).toList();
 
-    // Создаем список будущих объектов Group
-    List<Future<Group>> futureGroups = groupIds.map((id) => databaseHelper.getGroupById(id)).toList();
+    List<Future<Professor>> futureGroups = groupIds.map((id) => databaseHelper.getProfessorById(id)).toList();
 
-    // Ожидаем завершения всех асинхронных операций
-    List<Group> groupsList = await Future.wait(futureGroups);
+    List<Professor> groupsList = await Future.wait(futureGroups);
 
     return groupsList.toSet();
   }

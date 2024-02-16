@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:flutter_mobile_client/model/LessonType.dart';
+import 'package:flutter_mobile_client/model/Professor.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:uuid/uuid.dart';
 
 import '../model/Lesson.dart';
 
@@ -17,7 +20,6 @@ class LessonsDatabase {
       path,
       version: 1,
       onCreate: (db, version) {
-        // Создание таблицы при первом запуске
         return db.execute('''
           CREATE TABLE lessons(
             id INTEGER PRIMARY KEY,
@@ -48,10 +50,12 @@ class LessonsDatabase {
   Future<List<Lesson>> getLessons() async {
     await _openDatabase();
     final List<Map<String, dynamic>> maps = await _database!.query('lessons');
+    List<Lesson> lessons = [];
+    for (var map in maps) {
+      lessons.add(await Lesson.fromMap(map));
+    }
 
-    return List.generate(maps.length, (i) {
-      return Lesson.fromMap(maps[i]);
-    });
+    return lessons;
   }
 
   Future<void> deleteLesson(int id) async {
@@ -76,6 +80,14 @@ class LessonsDatabase {
 
     return Lesson.fromMap(maps.first);
   }
+  /*Lesson getLessonByDay(DateTime date){
+    List<LessonType> lessonType = [LessonType.LECTURE];
+    var uuid = Uuid();
+    String randomUuid = uuid.v4();
+    Professor professor = Professor(1, 'Коновалов', 'Кирилл', 'Андреевич',uuid , false);
+
+    return Lesson(1, 'Информационная безопасность', lessonType, day, timeStart, timeEnd, groups, professor, rooms, status)
+  }*/
 }
 
 
