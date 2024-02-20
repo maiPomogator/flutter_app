@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'package:flutter_mobile_client/model/LessonType.dart';

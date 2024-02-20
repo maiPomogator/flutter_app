@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_mobile_client/data/JsonBackup.dart';
 import 'package:flutter_mobile_client/data/UserPreferences.dart';
 import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -103,6 +104,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
 
         break;
       case 'backup':
+        await showBackupOptions(context);
         break;
       default:
         break;
@@ -151,6 +153,38 @@ class _SettingsFragmentState extends State<SettingsFragment> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> showBackupOptions(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Выберите опцию резервного копирования:'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    JsonBackup.readJson();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Импорт'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    JsonBackup.generateJson();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Экспорт'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

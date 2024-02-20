@@ -14,4 +14,12 @@ class UserPreferences {
   static Future<void> setIsAuth(bool value) async {
     await _preferences.setBool('isAuth', value);
   }
+
+  static Future<void> setMainType(String type) async {
+    await _preferences.setString('mainType', type);
+  }
+
+  static String? getMainType() {
+    return _preferences.getString('mainType');
+  }
 }

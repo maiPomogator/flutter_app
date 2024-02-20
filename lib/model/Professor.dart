@@ -1,7 +1,6 @@
-import 'dart:ffi';
 import 'package:uuid/uuid.dart';
 
-class Professor{
+class Professor {
   final int id;
   final String lastName;
   final String firstName;
@@ -9,7 +8,8 @@ class Professor{
   final Uuid siteId;
   final bool isMain;
 
-  const Professor(this.id, this.lastName, this.firstName, this.middleName, this.siteId, this.isMain);
+  const Professor(this.id, this.lastName, this.firstName, this.middleName,
+      this.siteId, this.isMain);
 
   Map<String, dynamic> toMap() {
     return {
@@ -23,9 +23,13 @@ class Professor{
   }
 
   factory Professor.fromMap(Map<String, dynamic> map) {
-    return Professor(map['id'], map['lastName'], map['firstName'], map['middleName'], map['siteId'], map['isMain'] == 1,
+    return Professor(
+      map['id'],
+      map['lastName'],
+      map['firstName'],
+      map['middleName'],
+      map['siteId'],
+      map['isMain'] == 1,
     );
   }
-
-
 }

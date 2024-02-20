@@ -9,16 +9,12 @@ import 'LessonsDatabase.dart';
 class NoteDatabase {
   late Database _database;
 
-  // Приватный конструктор
   NoteDatabase._privateConstructor();
 
-  // Единственный экземпляр класса NoteDatabase
   static final NoteDatabase _instance = NoteDatabase._privateConstructor();
 
-  // Публичный статический метод, чтобы получить экземпляр класса NoteDatabase
   static NoteDatabase get instance => _instance;
 
-  // Метод инициализации базы данных
   Future<void> initializeDatabase() async {
     final path = '${await getDatabasesPath()}notes_database.db';
     _database = await openDatabase(
