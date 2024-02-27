@@ -20,7 +20,7 @@ class _DayButtonState extends State<DayButton> {
   @override
   Widget build(BuildContext context) {
     bool isSelected = widget.selectedDate.weekday == widget.date.weekday;
-    bool isToday = DateTime.now().weekday == widget.date.weekday;
+    bool isToday = DateTime.now().day == widget.date.day;
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4),

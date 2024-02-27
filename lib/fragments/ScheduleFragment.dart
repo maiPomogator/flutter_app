@@ -3,6 +3,8 @@ import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import '../model/NoteType.dart';
+import '../notes/NoteCreationDialog.dart';
 import '../widgets/DayButton.dart';
 
 class ScheduleFragment extends StatefulWidget {
@@ -18,19 +20,23 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
   String _selectedGroup = "М3О-435Б-20";
   late double fem;
   DateTime _selectedDate = DateTime.now();
+  late DateTime currentDate;
+  late DateTime monday;
+  late List<DateTime> weekDates;
 
   _ScheduleFragmentState({required this.fem}) {
     initializeDateFormatting('ru', null);
   }
+  @override
+  void initState() {
+    currentDate = DateTime.now();
+    monday = currentDate.subtract(Duration(days: currentDate.weekday - 1));
+    weekDates = List.generate(7, (index) => monday.add(Duration(days: index)));
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    DateTime currentDate = DateTime.now();
-    DateTime monday =
-        currentDate.subtract(Duration(days: currentDate.weekday - 1));
-
-    List<DateTime> weekDates =
-        List.generate(7, (index) => monday.add(Duration(days: index)));
 
     const buttonWidth = 30.0;
     double totalSpacing =
@@ -38,6 +44,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
     double spacing = totalSpacing / (weekDates.length + 2);
 
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onHorizontalDragEnd: (DragEndDetails details) {
         double dx = details.primaryVelocity ?? 0;
         double sensitivity = 1.0;
@@ -135,9 +142,19 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                         Spacer(),
                         Padding(
                           padding: EdgeInsets.only(right: 10),
-                          child: ImageIcon(
+                          child:GestureDetector(onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => NoteCreationDialog(
+                                    currentDate: _selectedDate, type: NoteType.DAY, //todo lesson
+                                  )),
+                            );
+                            },
+    child:  ImageIcon(
                             AssetImage('assets/navigation/note_icon.png'),
                             size: 24,
+                          ),
                           ),
                         ),
                       ],
@@ -233,6 +250,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
     if (pickedDate != null && pickedDate != _selectedDate) {
       setState(() {
         _selectedDate = pickedDate;
+        weekDates = List.generate(7, (index) => _selectedDate.subtract(Duration(days: _selectedDate.weekday - 1)).add(Duration(days: index)));
       });
       print("Selected date: $_selectedDate");
     }
@@ -262,11 +280,10 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
           ],
           icon: Icon(
             Icons.arrow_drop_down,
-            color: Colors.black, // Adjust the color as needed
+            color: Colors.black,
           ),
           isExpanded: false,
           underline: Container(),
-          // Remove the underline
           selectedItemBuilder: (BuildContext context) {
             return [
               DropdownMenuItem(
@@ -275,7 +292,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                   _selectedGroup,
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.black, // Adjust the color as needed
+                    color: Colors.black,
                   ),
                 ),
               ),
@@ -295,6 +312,8 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
   void _updateSelectedDate(DateTime newDate) {
     setState(() {
       _selectedDate = newDate;
+      weekDates = List.generate(7, (index) => _selectedDate.subtract(Duration(days: _selectedDate.weekday - 1)).add(Duration(days: index)));
+
     });
   }
 }

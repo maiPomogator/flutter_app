@@ -30,29 +30,40 @@ class _NotesFragmentState extends State<NotesFragment> {
   late NoteDatabase noteDatabase;
   NoteType selectedType = NoteType.DAY;
   DateTime _selectedDate = DateTime.now();
+  late DateTime currentDate;
+  late DateTime monday;
+  late List<DateTime> weekDates;
 
   @override
   void initState() {
     super.initState();
-    // Инициализируем базу данных при создании виджета
+    currentDate = DateTime.now();
+    monday = currentDate.subtract(Duration(days: currentDate.weekday - 1));
+    weekDates = List.generate(7, (index) => monday.add(Duration(days: index)));
     noteDatabase = NoteDatabase.instance;
     noteDatabase.initializeDatabase();
   }
 
   @override
   Widget build(BuildContext context) {
-    DateTime currentDate = DateTime.now();
-    DateTime monday =
-        currentDate.subtract(Duration(days: currentDate.weekday - 1));
-
-    List<DateTime> weekDates =
-        List.generate(7, (index) => monday.add(Duration(days: index)));
 
     const buttonWidth = 30.0;
     double totalSpacing =
         MediaQuery.of(context).size.width - (weekDates.length * buttonWidth);
     double spacing = totalSpacing / (weekDates.length + 2);
-    return Padding(
+    return GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: (DragEndDetails details) {
+      double dx = details.primaryVelocity ?? 0;
+      double sensitivity = 1.0;
+
+      if (dx > sensitivity) {
+        _updateSelectedDate(_selectedDate.subtract(Duration(days: 1)));
+      } else if (dx < -sensitivity) {
+        _updateSelectedDate(_selectedDate.add(Duration(days: 1)));
+      }
+    },
+    child:Padding(
       padding: const EdgeInsets.fromLTRB(16, 46, 16, 0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -138,6 +149,8 @@ class _NotesFragmentState extends State<NotesFragment> {
                   style: AppTextStyle.secondTextStyle,
                 ),
                 const Spacer(),
+                selectedType == NoteType.LESSON ?
+                 Container(width: 24)   :
                 IconButton(
                   onPressed: () {
                     onCreatePressed();
@@ -290,6 +303,7 @@ class _NotesFragmentState extends State<NotesFragment> {
           ),
         ],
       ),
+    )
     );
   }
 
@@ -335,7 +349,7 @@ class _NotesFragmentState extends State<NotesFragment> {
       context,
       MaterialPageRoute(
           builder: (context) => NoteCreationDialog(
-                currentDate: _selectedDate,
+                currentDate: _selectedDate, type: NoteType.DAY,
               )),
     );
   }
@@ -364,14 +378,25 @@ class _NotesFragmentState extends State<NotesFragment> {
     if (pickedDate != null && pickedDate != _selectedDate) {
       setState(() {
         _selectedDate = pickedDate;
+        weekDates = List.generate(7, (index) => _selectedDate.subtract(Duration(days: _selectedDate.weekday - 1)).add(Duration(days: index)));
+
       });
       print("Selected date: $_selectedDate");
     }
   }
 
+  void _updateSelectedDate(DateTime newDate) {
+    setState(() {
+      _selectedDate = newDate;
+      weekDates = List.generate(7, (index) => _selectedDate.subtract(Duration(days: _selectedDate.weekday - 1)).add(Duration(days: index)));
+
+    });
+  }
+
   void _onDateSelected(DateTime date) {
     setState(() {
       _selectedDate = date;
+      weekDates = List.generate(7, (index) => _selectedDate.subtract(Duration(days: _selectedDate.weekday - 1)).add(Duration(days: index)));
     });
   }
   void updateNotes() {

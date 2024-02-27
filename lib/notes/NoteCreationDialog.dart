@@ -2,14 +2,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobile_client/data/NoteDatabase.dart';
 import 'package:flutter_mobile_client/errors/ErrorDialog.dart';
+import 'package:flutter_mobile_client/model/Lesson.dart';
+import 'package:flutter_mobile_client/model/NoteType.dart';
 import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 
 import '../model/Note.dart';
 
 class NoteCreationDialog extends StatefulWidget {
   final DateTime currentDate;
+  final NoteType type;
+  final Lesson? id;
 
-  NoteCreationDialog({required this.currentDate});
+  NoteCreationDialog({required this.currentDate, required this.type, this.id});
 
   @override
   _NoteCreationDialogState createState() => _NoteCreationDialogState();
@@ -192,7 +196,7 @@ class _NoteCreationDialogState extends State<NoteCreationDialog> {
               : selectedPriorityColor,
           false,
           _switchValue,
-          null);
+          widget.type==NoteType.DAY?null:widget.id,);
       await NoteDatabase.instance.insertNote(newNote);
       Navigator.of(context).pop();
     } else {
