@@ -3,6 +3,7 @@ import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import '../data/ApiProvider.dart';
 import '../model/NoteType.dart';
 import '../notes/NoteCreationDialog.dart';
 import '../widgets/DayButton.dart';
@@ -37,6 +38,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
 
   @override
   Widget build(BuildContext context) {
+    ApiProvider.startFetchingPeriodically(ApiProvider.fetchAllGroups);
 
     const buttonWidth = 30.0;
     double totalSpacing =
