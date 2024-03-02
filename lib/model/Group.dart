@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter_mobile_client/model/GroupType.dart';
 
 class Group {
@@ -8,7 +6,6 @@ class Group {
   final int course;
   final int faculty;
   final GroupType type;
-  final bool isMain;
 
   Group({
     required this.id,
@@ -16,7 +13,6 @@ class Group {
     required this.course,
     required this.faculty,
     required this.type,
-    required this.isMain,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,7 +22,6 @@ class Group {
       'course': course,
       'faculty': faculty,
       'type': type.toString(),
-      'isMain': isMain ? 1 : 0,
     };
   }
 
@@ -37,7 +32,6 @@ class Group {
       course: map['course'],
       faculty: map['faculty'],
       type: GroupType.fromString(map['type']),
-      isMain: map['isMain'] == 1,
     );
   }
 }

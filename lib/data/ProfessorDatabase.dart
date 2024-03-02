@@ -1,14 +1,12 @@
-import '../model/Group.dart';
+import '../model/Professor.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-
-import '../model/Professor.dart';
 
 class ProfessorDatabase {
   static Database? _database;
   static const String tableName = 'professors';
 
-  Future<Database> get database async {
+  static Future<Database> get database async {
     if (_database != null) {
       return _database!;
     }
@@ -17,31 +15,30 @@ class ProfessorDatabase {
     return _database!;
   }
 
-  Future<Database> initDatabase() async {
+  static Future<Database> initDatabase() async {
     String path = join(await getDatabasesPath(), 'professor_database.db');
 
     return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
-  Future<void> _onCreate(Database db, int version) async {
+  static Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS $tableName (
         id INTEGER PRIMARY KEY,
         lastName TEXT,
         firstName TEXT,
         middleName TEXT,
-        siteId TEXT,
-        isMain BOOLEAN
+        siteId TEXT
       )
     ''');
   }
 
-  Future<void> insertProfessor(Professor professor) async {
+  static Future<void> insertProfessor(Professor professor) async {
     final Database db = await database;
     await db.insert(tableName, professor.toMap());
   }
 
-  Future<List<Professor>> getAllProfessors() async {
+  static Future<List<Professor>> getAllProfessors() async {
     final Database db = await database;
     List<Map<String, dynamic>> maps = await db.query(tableName);
 
@@ -50,7 +47,7 @@ class ProfessorDatabase {
     });
   }
 
-  Future<Professor> getProfessorById(int id) async {
+  static Future<Professor> getProfessorById(int id) async {
     final Database db = await database;
     List<Map<String, dynamic>> maps = await db.query(
       tableName,

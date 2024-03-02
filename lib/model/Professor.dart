@@ -6,10 +6,9 @@ class Professor {
   final String firstName;
   final String middleName;
   final Uuid siteId;
-  final bool isMain;
 
-  const Professor(this.id, this.lastName, this.firstName, this.middleName,
-      this.siteId, this.isMain);
+  const Professor(
+      this.id, this.lastName, this.firstName, this.middleName, this.siteId);
 
   Map<String, dynamic> toMap() {
     return {
@@ -18,7 +17,6 @@ class Professor {
       'firstName': firstName,
       'middleName': middleName,
       'siteId': siteId,
-      'isMain': isMain ? 1 : 0,
     };
   }
 
@@ -29,7 +27,6 @@ class Professor {
       map['firstName'],
       map['middleName'],
       map['siteId'],
-      map['isMain'] == 1,
     );
   }
 }

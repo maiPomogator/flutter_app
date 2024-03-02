@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobile_client/data/GroupDatabaseHelper.dart';
+import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
+import 'package:flutter_mobile_client/data/SheduleList.dart';
 import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-import '../data/ApiProvider.dart';
+import '../model/Group.dart';
 import '../model/NoteType.dart';
+import '../model/Professor.dart';
 import '../notes/NoteCreationDialog.dart';
 import '../widgets/DayButton.dart';
 
@@ -24,22 +28,24 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
   late DateTime currentDate;
   late DateTime monday;
   late List<DateTime> weekDates;
+  late List<Map<String, dynamic>> groupList;
+  dynamic aboutData;
 
   _ScheduleFragmentState({required this.fem}) {
     initializeDateFormatting('ru', null);
   }
+
   @override
-  void initState() {
+  Future<void> initState() async {
     currentDate = DateTime.now();
     monday = currentDate.subtract(Duration(days: currentDate.weekday - 1));
     weekDates = List.generate(7, (index) => monday.add(Duration(days: index)));
+    groupList = await ScheduleList.instance.getScheduleList();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    ApiProvider.startFetchingPeriodically(ApiProvider.fetchAllGroups);
-
     const buttonWidth = 30.0;
     double totalSpacing =
         MediaQuery.of(context).size.width - (weekDates.length * buttonWidth);
@@ -128,11 +134,13 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                         Container(
                           width: 57,
                           height: 22,
-                          decoration: BoxDecoration(color: Color(0xFFE9EEF3),
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(99),
-                            bottomRight: Radius.circular(99),
-                          ),),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFE9EEF3),
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(99),
+                              bottomRight: Radius.circular(99),
+                            ),
+                          ),
                           child: Center(
                             child: Text('1'),
                           ),
@@ -144,19 +152,21 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                         Spacer(),
                         Padding(
                           padding: EdgeInsets.only(right: 10),
-                          child:GestureDetector(onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => NoteCreationDialog(
-                                    currentDate: _selectedDate, type: NoteType.DAY, //todo lesson
-                                  )),
-                            );
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => NoteCreationDialog(
+                                          currentDate: _selectedDate,
+                                          type: NoteType.DAY, //todo lesson
+                                        )),
+                              );
                             },
-    child:  ImageIcon(
-                            AssetImage('assets/navigation/note_icon.png'),
-                            size: 24,
-                          ),
+                            child: ImageIcon(
+                              AssetImage('assets/navigation/note_icon.png'),
+                              size: 24,
+                            ),
                           ),
                         ),
                       ],
@@ -192,8 +202,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                               style: AppTextStyle.secondTextStyle,
                             ),
                           ],
-                        )
-                    ),
+                        )),
                   ],
                 )
               : noPairs()
@@ -252,57 +261,87 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
     if (pickedDate != null && pickedDate != _selectedDate) {
       setState(() {
         _selectedDate = pickedDate;
-        weekDates = List.generate(7, (index) => _selectedDate.subtract(Duration(days: _selectedDate.weekday - 1)).add(Duration(days: index)));
+        weekDates = List.generate(
+            7,
+            (index) => _selectedDate
+                .subtract(Duration(days: _selectedDate.weekday - 1))
+                .add(Duration(days: index)));
       });
       print("Selected date: $_selectedDate");
     }
   }
 
   Widget _buildGroupDropdown() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      // Align the dropdown in the center horizontally
-      children: [
-        DropdownButton<String>(
-          value: _selectedGroup,
-          onChanged: (String? selectedGroup) {
-            if (selectedGroup != null) {
-              _onGroupChanged(selectedGroup);
-            }
-          },
-          items: [
-            DropdownMenuItem(
-              value: "М3О-435Б-20",
-              child: Text("М3О-435Б-20"),
-            ),
-            DropdownMenuItem(
-              value: "М3З-228М-25",
-              child: Text("М3З-228М-25"),
-            ),
-          ],
-          icon: Icon(
-            Icons.arrow_drop_down,
-            color: Colors.black,
-          ),
-          isExpanded: false,
-          underline: Container(),
-          selectedItemBuilder: (BuildContext context) {
-            return [
-              DropdownMenuItem(
+    return FutureBuilder<List<DropdownMenuItem<String>>>(
+      future: _buildDropdownItems(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          final dropdownItems = snapshot.data ?? [];
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              DropdownButton<String>(
                 value: _selectedGroup,
-                child: Text(
-                  _selectedGroup,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
+                onChanged: (String? selectedGroup) {
+                  if (selectedGroup != null) {
+                    _onGroupChanged(selectedGroup);
+                  }
+                },
+                items: dropdownItems,
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  color: Colors.black,
                 ),
+                isExpanded: false,
+                underline: Container(),
+                selectedItemBuilder: (BuildContext context) {
+                  return groupList.map<Widget>((group) {
+                    final scheduleId = group['schedule_id'];
+                    final typeName =
+                        group['type'] == 'group' ? group['name'] : '...';
+                    return DropdownMenuItem<String>(
+                      value: '$scheduleId ${group['type']}',
+                      child: Text(
+                        typeName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                    );
+                  }).toList();
+                },
               ),
-            ];
-          },
-        ),
-      ],
+            ],
+          );
+        }
+      },
     );
+  }
+
+  Future<List<DropdownMenuItem<String>>> _buildDropdownItems() async {
+    final dropdownItems = <DropdownMenuItem<String>>[];
+    for (final group in groupList) {
+      final scheduleId = group['schedule_id'];
+      if (group['type'] == 'group') {
+        aboutData = await GroupDatabaseHelper.getGroupById(scheduleId);
+      } else {
+        aboutData = await ProfessorDatabase.getProfessorById(scheduleId);
+      }
+      dropdownItems.add(
+        DropdownMenuItem<String>(
+          value: '$scheduleId ${group['type']}',
+          child: group['type'] == 'group'
+              ? Text((aboutData as Group).name)
+              : Text((aboutData as Professor).lastName),
+        ),
+      );
+    }
+    return dropdownItems;
   }
 
   void _onGroupChanged(String selectedGroup) {
@@ -314,8 +353,11 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
   void _updateSelectedDate(DateTime newDate) {
     setState(() {
       _selectedDate = newDate;
-      weekDates = List.generate(7, (index) => _selectedDate.subtract(Duration(days: _selectedDate.weekday - 1)).add(Duration(days: index)));
-
+      weekDates = List.generate(
+          7,
+          (index) => _selectedDate
+              .subtract(Duration(days: _selectedDate.weekday - 1))
+              .add(Duration(days: index)));
     });
   }
 }

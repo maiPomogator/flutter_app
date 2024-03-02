@@ -6,9 +6,9 @@ class GroupType {
   static const GroupType POSTGRADUATE = GroupType("Аспирантура");
   static const GroupType SPECIALIST = GroupType("Специалитет");
   static const GroupType BASIC_HIGHER_EDUCATION =
-  GroupType("Базовое высшее образование");
+      GroupType("Базовое высшее образование");
   static const GroupType SPECIALIZED_HIGHER_EDUCATION =
-  GroupType("Специализированное высшее образование");
+      GroupType("Специализированное высшее образование");
 
   const GroupType(this.name);
 
@@ -35,9 +35,20 @@ class GroupType {
         return BASIC_HIGHER_EDUCATION;
       case "Специализированное высшее образование":
         return SPECIALIZED_HIGHER_EDUCATION;
+      case "BACHELOR":
+        return BACHELOR;
+      case "MAGISTRACY":
+        return MAGISTRACY;
+      case "POSTGRADUATE":
+        return POSTGRADUATE;
+      case "SPECIALIST":
+        return SPECIALIST;
+      case "BASIC_HIGHER_EDUCATION":
+        return BASIC_HIGHER_EDUCATION;
+      case "SPECIALIZED_HIGHER_EDUCATION":
+        return SPECIALIZED_HIGHER_EDUCATION;
       default:
         throw ArgumentError("Invalid GroupType: $typeName");
     }
   }
 }
-

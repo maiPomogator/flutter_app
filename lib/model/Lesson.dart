@@ -1,4 +1,3 @@
-
 import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'package:flutter_mobile_client/model/LessonType.dart';
 
@@ -31,7 +30,8 @@ class Lesson {
       'timeStart': timeStart,
       'timeEnd': timeEnd,
       'groups': groups.map((group) => group.id).toList().toString(),
-      'professors': professors.map((professors) => professors.id).toList().toString(),
+      'professors':
+          professors.map((professors) => professors.id).toList().toString(),
       'rooms': rooms.toString(),
       'status': status,
     };
@@ -83,37 +83,35 @@ class Lesson {
           lessonTypes.add(LessonType.EXAM);
           break;
         default:
-        // Handle unrecognized lesson type
           break;
       }
     }
     return lessonTypes;
   }
 
-
   static Future<Set<Group>> groupsFromString(String data) async {
-    GroupDatabaseHelper databaseHelper = GroupDatabaseHelper();
     data = data.replaceAll('[', '').replaceAll(']', '');
-    List<int> groupIds = data.split(', ').map((String s) => int.parse(s)).toList();
+    List<int> groupIds =
+        data.split(', ').map((String s) => int.parse(s)).toList();
 
-    List<Future<Group>> futureGroups = groupIds.map((id) => databaseHelper.getGroupById(id)).toList();
+    List<Future<Group>> futureGroups =
+        groupIds.map((id) => GroupDatabaseHelper.getGroupById(id)).toList();
 
     List<Group> groupsList = await Future.wait(futureGroups);
 
     return groupsList.toSet();
   }
 
-
   static Future<Set<Professor>> professorsFromString(String data) async {
-    ProfessorDatabase databaseHelper = ProfessorDatabase();
     data = data.replaceAll('[', '').replaceAll(']', '');
-    List<int> groupIds = data.split(', ').map((String s) => int.parse(s)).toList();
+    List<int> groupIds =
+        data.split(', ').map((String s) => int.parse(s)).toList();
 
-    List<Future<Professor>> futureGroups = groupIds.map((id) => databaseHelper.getProfessorById(id)).toList();
+    List<Future<Professor>> futureGroups =
+        groupIds.map((id) => ProfessorDatabase.getProfessorById(id)).toList();
 
     List<Professor> groupsList = await Future.wait(futureGroups);
 
     return groupsList.toSet();
   }
-
 }

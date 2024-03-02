@@ -1,11 +1,12 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_mobile_client/FirstChoiceScreen.dart';
+import 'package:flutter_mobile_client/MainScreen.dart';
+import 'package:flutter_mobile_client/data/GroupDatabaseHelper.dart';
 import 'package:flutter_mobile_client/data/NoteDatabase.dart';
+import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
+import 'data/SheduleList.dart';
 import 'data/UserPreferences.dart';
-import 'fragments/NotesFragment.dart';
-import 'fragments/ScheduleFragment.dart';
-import 'fragments/SettingsFragment.dart';
 
 Future<void> main() async {
   //debugPaintSizeEnabled = true;
@@ -14,6 +15,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await UserPreferences.init();
   await NoteDatabase.instance.initializeDatabase();
+  await ScheduleList.instance.initializeDatabase();
+  await ProfessorDatabase.initDatabase();
+  await GroupDatabaseHelper.initDatabase();
   runApp(const MyApp());
 }
 
@@ -44,68 +48,24 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
 
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    double baseWidth = 1280;
-    double fem = MediaQuery.of(context).size.width / baseWidth;
-    return Scaffold(
-      appBar: null,
-      body: Column(
-        children: [
-          _getBody(_currentIndex, fem),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
-          _buildNavItem('assets/navigation/schedule_icon.png', 'Расписание', 0),
-          _buildNavItem('assets/navigation/note_icon.png', 'Заметки', 1),
-          _buildNavItem('assets/navigation/settings_icon.png', 'Настройки', 2),
-        ],
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
-        selectedLabelStyle: TextStyle(color: Colors.black),
-        unselectedLabelStyle: TextStyle(color: const Color(0xFF2C4A60)),
-      ),
-    );
-  }
-
-  Widget _getBody(int index, double fem) {
-    switch (index) {
-      case 0:
-        return ScheduleFragment(
-          fem: fem,
-        );
-      case 1:
-        return NotesFragment(fem: fem,);
-      case 2:
-        return SettingsFragment();
-      default:
-        return Container();
-    }
-  }
-
-  BottomNavigationBarItem _buildNavItem(String icon, String label, int index) {
-    bool isSelected = index == _currentIndex;
-    return BottomNavigationBarItem(
-      icon: Container(
-        width: 64,
-        height: 32,
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2C4A60) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Image.asset(
-          icon,
-          color: isSelected ? Colors.white : const Color(0xFF2C4A60),
-        ),
-      ),
-      label: label,
+    return FutureBuilder<int>(
+      future: ScheduleList.instance.getCount(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          print('Ошибка: ${snapshot.error}');
+          return Text('Ошибка: ${snapshot.error}');
+        } else {
+          if (_currentIndex == 0 && snapshot.data! > 0) {
+            return MainScreen();
+          } else {
+            return FirstChoiceScreen();
+          }
+        }
+      },
     );
   }
 }

@@ -19,7 +19,8 @@ class ScheduleList {
           CREATE TABLE schedule_list(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             type TEXT,
-            schedule_id integer
+            schedule_id integer,
+            isMain boolean
           )
           ''',
         );
@@ -28,20 +29,29 @@ class ScheduleList {
     );
   }
 
-  Future<int> insertList(int id, String type) async {
+  Future<int> insertList(int id, String type, bool isMain) async {
     Map<String, dynamic> data = {
       'schedule_id': id,
       'type': type,
+      'isMain': isMain
     };
     return await _database.insert('schedule_list', data);
   }
 
-
   Future<List<Map<String, dynamic>>> getScheduleList() async {
-    return await _database.query('schedule_list', columns: ['schedule_id', 'type']);
+    return await _database
+        .query('schedule_list', columns: ['schedule_id', 'type', 'isMain']);
   }
 
-  Future<int> deleteNote(int id, String type) async {
-    return await _database.delete('schedule_list', where: 'schedule_id = ? and type=?', whereArgs: [id, type]);
+  Future<int> deleteList(int id, String type) async {
+    return await _database.delete('schedule_list',
+        where: 'schedule_id = ? and type=?', whereArgs: [id, type]);
+  }
+
+  Future<int> getCount() async {
+    final List<Map<String, dynamic>> count =
+        await _database.rawQuery('SELECT COUNT(*) FROM schedule_list');
+    final int result = Sqflite.firstIntValue(count)!;
+    return result;
   }
 }

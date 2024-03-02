@@ -3,17 +3,36 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
+import '../model/Group.dart';
+import '../model/GroupType.dart';
+
 class ApiProvider {
   static String baseUrl = dotenv.env['ADDRESS'] ?? '';
   static Timer? _timer;
   static bool _attempted = false;
 
-  static void fetchAllGroups() async {
+  static Future<List<Group>> fetchAllGroups() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/mai/groups'));
+      final response = await http.get(
+        Uri.parse('$baseUrl/mai/groups'),
+        headers: {
+          "Accept-Charset": "utf-8",
+          "Content-Type": "application/json; charset=utf-8"
+        },
+      );
       if (response.statusCode == 200) {
-        print(jsonDecode(response.body));
+        final List<dynamic> jsonData = jsonDecode(response.body);
+        final List<Group> groups = jsonData.map((json) {
+          return Group(
+            id: json['id'],
+            name: json['name'],
+            course: json['course'],
+            faculty: json['faculty'],
+            type: GroupType.fromString(json['type']),
+          );
+        }).toList();
         _attempted = false;
+        return groups;
       } else {
         throw Exception(
             'Failed to load data fetchAllGroups: ${response.statusCode}');
@@ -25,26 +44,68 @@ class ApiProvider {
       } else {
         _attempted = true;
       }
+      return [];
     }
   }
 
-  static void fetchGroupById(int id) async {
+  static Future<List<Group>> fetchGroupsByCourseAndFac(
+      String course, String faculty) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/mai/groups/{$id}'));
+      final response = await http.get(
+        Uri.parse('$baseUrl/mai/groups?course=$course&faculty=$faculty'),
+        headers: {
+          "Accept-Charset": "utf-8",
+          "Content-Type": "application/json; charset=utf-8"
+        },
+      );
       if (response.statusCode == 200) {
-        print(jsonDecode(response.body));
+        final List<dynamic> jsonData = jsonDecode(response.body);
+        final List<Group> groups = jsonData.map((json) {
+          return Group(
+            id: json['id'],
+            name: json['name'],
+            course: json['course'],
+            faculty: json['faculty'],
+            type: GroupType.fromString(json['type']),
+          );
+        }).toList();
         _attempted = false;
+        return groups;
+      } else {
+        throw Exception(
+            'Failed to load data fetchGroupsByCourseAndFac: ${response.statusCode}');
+      }
+    } catch (e) {
+      print(
+          'Error occurred: $e address $baseUrl/mai/groups?course=$course&faculty=$faculty');
+      if (_attempted) {
+        startFetchingPeriodically(fetchAllGroups);
+      } else {
+        _attempted = true;
+      }
+      return [];
+    }
+  }
+
+  static Future<Group> fetchGroupById(int id) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/mai/groups/$id'));
+      if (response.statusCode == 200) {
+        final parsed = jsonDecode(response.body);
+        _attempted = false;
+        return Group.fromMap(parsed);
       } else {
         throw Exception(
             'Failed to load data groupById: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e address $baseUrl/mai/groups/{$id}');
+      print('Error occurred: $e address $baseUrl/mai/groups/$id');
       if (_attempted) {
         startFetchingPeriodically(() => fetchGroupById(id));
       } else {
         _attempted = true;
       }
+      throw Exception('Error occurred while fetching group by id');
     }
   }
 
@@ -53,7 +114,8 @@ class ApiProvider {
       final response =
           await http.get(Uri.parse('$baseUrl/mai/groups/{$id}/lessons'));
       if (response.statusCode == 200) {
-        print(jsonDecode(response.body));
+        print(jsonDecode(response
+            .body)); //todo здесь на list переделать после запуска сервера
         _attempted = false;
       } else {
         throw Exception(
@@ -73,7 +135,8 @@ class ApiProvider {
     try {
       final response = await http.get(Uri.parse('$baseUrl/mai/professors'));
       if (response.statusCode == 200) {
-        print(jsonDecode(response.body));
+        print(jsonDecode(response
+            .body)); //todo здесь на list переделать после запуска сервера
         _attempted = false;
       } else {
         throw Exception(
@@ -94,7 +157,8 @@ class ApiProvider {
       final response =
           await http.get(Uri.parse('$baseUrl/mai/professors/{$id}'));
       if (response.statusCode == 200) {
-        print(jsonDecode(response.body));
+        print(jsonDecode(response
+            .body)); //todo здесь на list переделать после запуска сервера
         _attempted = false;
       } else {
         throw Exception(
@@ -115,7 +179,8 @@ class ApiProvider {
       final response =
           await http.get(Uri.parse('$baseUrl/mai/professors/{$id}/lessons'));
       if (response.statusCode == 200) {
-        print(jsonDecode(response.body));
+        print(jsonDecode(response
+            .body)); //todo здесь на list переделать после запуска сервера
         _attempted = false;
       } else {
         throw Exception(

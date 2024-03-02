@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'package:flutter_mobile_client/model/LessonType.dart';
-import 'package:flutter_mobile_client/model/Professor.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:uuid/uuid.dart';
 
 import '../model/Lesson.dart';
 
@@ -66,6 +63,7 @@ class LessonsDatabase {
       whereArgs: [id],
     );
   }
+
   Future<Lesson?> getLessonById(int id) async {
     await _openDatabase();
     List<Map<String, dynamic>> maps = await _database!.query(
@@ -80,15 +78,4 @@ class LessonsDatabase {
 
     return Lesson.fromMap(maps.first);
   }
-  /*Lesson getLessonByDay(DateTime date){
-    List<LessonType> lessonType = [LessonType.LECTURE];
-    var uuid = Uuid();
-    String randomUuid = uuid.v4();
-    Professor professor = Professor(1, 'Коновалов', 'Кирилл', 'Андреевич',uuid , false);
-
-    return Lesson(1, 'Информационная безопасность', lessonType, day, timeStart, timeEnd, groups, professor, rooms, status)
-  }*/
 }
-
-
-
