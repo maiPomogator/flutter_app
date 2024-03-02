@@ -22,7 +22,7 @@ class ScheduleFragment extends StatefulWidget {
 }
 
 class _ScheduleFragmentState extends State<ScheduleFragment> {
-  String _selectedGroup = "М3О-435Б-20";
+  String? _selectedGroup ;
   late double fem;
   DateTime _selectedDate = DateTime.now();
   late DateTime currentDate;
@@ -30,18 +30,41 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
   late List<DateTime> weekDates;
   late List<Map<String, dynamic>> groupList;
   dynamic aboutData;
+  bool _isLoading = false;
 
   _ScheduleFragmentState({required this.fem}) {
     initializeDateFormatting('ru', null);
   }
 
   @override
-  Future<void> initState() async {
+  void initState()  {
     currentDate = DateTime.now();
     monday = currentDate.subtract(Duration(days: currentDate.weekday - 1));
     weekDates = List.generate(7, (index) => monday.add(Duration(days: index)));
-    groupList = await ScheduleList.instance.getScheduleList();
     super.initState();
+    initializeDateFormatting('ru', null);
+   // _initializeData();
+  }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializeData();
+  }
+
+
+  Future<void> _initializeData() async {
+    setState(() {
+      _isLoading = true; // Устанавливаем состояние загрузки в true перед загрузкой данных
+    });
+    try {
+      groupList = await ScheduleList.instance.getScheduleList();
+    } catch (error) {
+      // Обработка ошибки загрузки данных, если необходимо
+    } finally {
+      setState(() {
+        _isLoading = false; // Устанавливаем состояние загрузки в false после завершения загрузки
+      });
+    }
   }
 
   @override
@@ -50,52 +73,70 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
     double totalSpacing =
         MediaQuery.of(context).size.width - (weekDates.length * buttonWidth);
     double spacing = totalSpacing / (weekDates.length + 2);
+    if (_isLoading) {
+      return CircularProgressIndicator();
+    } else {
+      return GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: (DragEndDetails details) {
+          double dx = details.primaryVelocity ?? 0;
+          double sensitivity = 1.0;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onHorizontalDragEnd: (DragEndDetails details) {
-        double dx = details.primaryVelocity ?? 0;
-        double sensitivity = 1.0;
-
-        if (dx > sensitivity) {
-          _updateSelectedDate(_selectedDate.subtract(Duration(days: 1)));
-        } else if (dx < -sensitivity) {
-          _updateSelectedDate(_selectedDate.add(Duration(days: 1)));
-        }
-      },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(top: 46),
-            child: _buildGroupDropdown(),
-          ),
-          SizedBox(
-            height: 35,
-            child: Row(
-              children: [
-                Text(
-                  DateFormat('d MMMM', 'ru').format(currentDate),
-                  style: AppTextStyle.secondTextStyle,
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: () => _selectDate(context),
-                  icon: const Icon(Icons.calendar_month,
-                      color: Color(0xFF2C4A60), size: 24),
-                )
-              ],
+          if (dx > sensitivity) {
+            _updateSelectedDate(_selectedDate.subtract(Duration(days: 1)));
+          } else if (dx < -sensitivity) {
+            _updateSelectedDate(_selectedDate.add(Duration(days: 1)));
+          }
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(top: 46),
+              child: _buildGroupDropdown(),
             ),
-          ),
-          Container(
-            width: MediaQuery.of(context).size.width,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+            SizedBox(
+              height: 35,
               child: Row(
                 children: [
-                  for (int i = 0; i < weekDates.length; i++)
-                    i == weekDates.length - 1
-                        ? ConstrainedBox(
+                  Text(
+                    DateFormat('d MMMM', 'ru').format(currentDate),
+                    style: AppTextStyle.secondTextStyle,
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => _selectDate(context),
+                    icon: const Icon(Icons.calendar_month,
+                        color: Color(0xFF2C4A60), size: 24),
+                  )
+                ],
+              ),
+            ),
+            Container(
+              width: MediaQuery
+                  .of(context)
+                  .size
+                  .width,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (int i = 0; i < weekDates.length; i++)
+                      i == weekDates.length - 1
+                          ? ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: 30,
+                          minHeight: 57,
+                        ),
+                        child: DayButton(
+                          date: weekDates[i],
+                          selectedDate: _selectedDate,
+                          onDateSelected: _onDateSelected,
+                        ),
+                      )
+                          : Row(
+                        children: [
+                          ConstrainedBox(
                             constraints: BoxConstraints(
                               minWidth: 30,
                               minHeight: 57,
@@ -105,110 +146,101 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                               selectedDate: _selectedDate,
                               onDateSelected: _onDateSelected,
                             ),
-                          )
-                        : Row(
-                            children: [
-                              ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  minWidth: 30,
-                                  minHeight: 57,
-                                ),
-                                child: DayButton(
-                                  date: weekDates[i],
-                                  selectedDate: _selectedDate,
-                                  onDateSelected: _onDateSelected,
-                                ),
-                              ),
-                              Spacing(width: spacing),
-                            ],
                           ),
-                ],
+                          Spacing(width: spacing),
+                        ],
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-          _selectedDate.day == DateTime.now().day
-              ? Column(
+            _selectedDate.day == DateTime
+                .now()
+                .day
+                ? Column(
+              children: [
+                Row(
                   children: [
-                    Row(
+                    Container(
+                      width: 57,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: Color(0xFFE9EEF3),
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(99),
+                          bottomRight: Radius.circular(99),
+                        ),
+                      ),
+                      child: Center(
+                        child: Text('1'),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 16),
+                      child: Text('10:45 - 12:15'),
+                    ),
+                    Spacer(),
+                    Padding(
+                      padding: EdgeInsets.only(right: 10),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    NoteCreationDialog(
+                                      currentDate: _selectedDate,
+                                      type: NoteType.DAY, //todo lesson
+                                    )),
+                          );
+                        },
+                        child: ImageIcon(
+                          AssetImage('assets/navigation/note_icon.png'),
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                    decoration: BoxDecoration(
+                      color: Color(0xffE9EEF3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    margin: EdgeInsets.symmetric(horizontal: 18),
+                    padding: EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 57,
-                          height: 22,
-                          decoration: BoxDecoration(
-                            color: Color(0xFFE9EEF3),
-                            borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(99),
-                              bottomRight: Radius.circular(99),
-                            ),
-                          ),
-                          child: Center(
-                            child: Text('1'),
-                          ),
+                        Text(
+                          'Информационная безопасность',
+                          style: AppTextStyle.headerTextStyle,
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 16),
-                          child: Text('10:45 - 12:15'),
+                        Text(
+                          'Лекция',
+                          style: AppTextStyle.mainTextStyle,
                         ),
-                        Spacer(),
-                        Padding(
-                          padding: EdgeInsets.only(right: 10),
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => NoteCreationDialog(
-                                          currentDate: _selectedDate,
-                                          type: NoteType.DAY, //todo lesson
-                                        )),
-                              );
-                            },
-                            child: ImageIcon(
-                              AssetImage('assets/navigation/note_icon.png'),
-                              size: 24,
-                            ),
-                          ),
+                        Text(
+                          'М3О-435Б-20',
+                          style: AppTextStyle.secondTextStyle,
+                        ),
+                        Text(
+                          'Коновалов Кирилл Андреевич',
+                          style: AppTextStyle.secondTextStyle,
+                        ),
+                        Text(
+                          '404В',
+                          style: AppTextStyle.secondTextStyle,
                         ),
                       ],
-                    ),
-                    Container(
-                        decoration: BoxDecoration(
-                          color: Color(0xffE9EEF3),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        margin: EdgeInsets.symmetric(horizontal: 18),
-                        padding: EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Информационная безопасность',
-                              style: AppTextStyle.headerTextStyle,
-                            ),
-                            Text(
-                              'Лекция',
-                              style: AppTextStyle.mainTextStyle,
-                            ),
-                            Text(
-                              'М3О-435Б-20',
-                              style: AppTextStyle.secondTextStyle,
-                            ),
-                            Text(
-                              'Коновалов Кирилл Андреевич',
-                              style: AppTextStyle.secondTextStyle,
-                            ),
-                            Text(
-                              '404В',
-                              style: AppTextStyle.secondTextStyle,
-                            ),
-                          ],
-                        )),
-                  ],
-                )
-              : noPairs()
-        ],
-      ),
-    );
+                    )),
+              ],
+            )
+                : noPairs()
+          ],
+        ),
+      );
+    }
   }
 
   Widget noPairs() {
@@ -298,11 +330,11 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                 ),
                 isExpanded: false,
                 underline: Container(),
-                selectedItemBuilder: (BuildContext context) {
+                /*selectedItemBuilder: (BuildContext context) {
                   return groupList.map<Widget>((group) {
                     final scheduleId = group['schedule_id'];
                     final typeName =
-                        group['type'] == 'group' ? group['name'] : '...';
+                    group['type'] == 'group' ? group['name'] : '...';
                     return DropdownMenuItem<String>(
                       value: '$scheduleId ${group['type']}',
                       child: Text(
@@ -314,7 +346,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                       ),
                     );
                   }).toList();
-                },
+                },*/
               ),
             ],
           );
@@ -322,6 +354,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
       },
     );
   }
+
 
   Future<List<DropdownMenuItem<String>>> _buildDropdownItems() async {
     final dropdownItems = <DropdownMenuItem<String>>[];

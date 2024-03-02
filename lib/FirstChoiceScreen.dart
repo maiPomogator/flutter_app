@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobile_client/MainScreen.dart';
 import 'package:flutter_mobile_client/data/ApiProvider.dart';
 
+import 'data/LocalDataBaseUpdater.dart';
 import 'data/SheduleList.dart';
 import 'model/Group.dart';
 
@@ -124,14 +125,15 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
                           return Column(children: [
                             _buildDropdown(groups),
                             GestureDetector(
-                              onTap: () {
-                                setState(() async {
-                                  int countOfGroups =
-                                      await ScheduleList.instance.getCount();
-                                  ScheduleList.instance.insertList(
-                                      int.parse(dropdownGroupValue!),
-                                      'group',
-                                      countOfGroups > 0 ? false : true);
+                              onTap: () async {
+                                int countOfGroups =
+                                    await ScheduleList.instance.getCount();
+                                ScheduleList.instance.insertList(
+                                    int.parse(dropdownGroupValue!),
+                                    'group',
+                                    countOfGroups > 0 ? false : true);
+                                LocalDatabaseHelper.instance.populateGroupDatabaseFromServerById( int.parse(dropdownGroupValue!));
+                                setState(() {
                                   Navigator.pushReplacement(
                                       context, mainNavigationRoute);
                                 });
@@ -220,4 +222,5 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
       _selectedIndex = index;
     });
   }
+
 }

@@ -14,7 +14,7 @@ class GroupType {
 
   @override
   String toString() {
-    return 'GroupType{name: $name}';
+    return name;
   }
 
   String getFullName() {
