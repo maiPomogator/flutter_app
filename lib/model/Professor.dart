@@ -5,7 +5,7 @@ class Professor {
   final String lastName;
   final String firstName;
   final String middleName;
-  final Uuid siteId;
+  final String siteId;
 
   const Professor(
       this.id, this.lastName, this.firstName, this.middleName, this.siteId);

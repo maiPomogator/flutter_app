@@ -73,7 +73,7 @@ class JsonBackup {
         for (var map in notesJson) {
           Lesson? lesson;
           if (map['lessonId'] != null) {
-            lesson = await LessonsDatabase().getLessonById(map['lessonId']);
+            lesson = await LessonsDatabase.getLessonById(map['lessonId']);
           }
           notes.add(Note(
             map['id'],

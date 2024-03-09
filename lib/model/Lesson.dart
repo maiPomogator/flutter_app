@@ -1,8 +1,10 @@
 import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'package:flutter_mobile_client/model/LessonType.dart';
+import 'package:intl/intl.dart';
 
 import '../data/GroupDatabaseHelper.dart';
 import 'Group.dart';
+import 'GroupType.dart';
 import 'LessonStatus.dart';
 import 'Professor.dart';
 
@@ -10,47 +12,168 @@ class Lesson {
   final int id;
   final String name;
   final List<LessonType> types;
-  final DateTime day;
+  final DateTime date;
   final DateTime timeStart;
   final DateTime timeEnd;
-  final Set<Group> groups;
-  final Set<Professor> professors;
+  final List<Group> groups;
+  final List<Professor> professors;
   final List<String> rooms;
   final LessonStatus status;
 
-  const Lesson(this.id, this.name, this.types, this.day, this.timeStart,
+  const Lesson(this.id, this.name, this.types, this.date, this.timeStart,
       this.timeEnd, this.groups, this.professors, this.rooms, this.status);
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'name': name,
-      'type': types.toString(),
-      'day': day,
-      'timeStart': timeStart,
-      'timeEnd': timeEnd,
-      'groups': groups.map((group) => group.id).toList().toString(),
-      'professors':
-          professors.map((professors) => professors.id).toList().toString(),
-      'rooms': rooms.toString(),
-      'status': status,
+      'types': types.map((type) => type.name).toList(),
+      'date': date.toIso8601String(),
+      'timeStart': timeStart.toIso8601String(),
+      'timeEnd': timeEnd.toIso8601String(),
+      'groups': groups.map((group) => group.toMap()).toList(),
+      'professors': professors.map((professor) => professor.toMap()).toList(),
+      'rooms': rooms,
+      'status': status.toString(),
     };
   }
 
-  static Future<Lesson> fromMap(Map<String, dynamic> map) async {
+  String statusToString(LessonStatus status) {
+    switch (status) {
+      case LessonStatus.CREATED:
+        return 'CREATED';
+      case LessonStatus.SAVED:
+        return 'SAVED';
+      case LessonStatus.CANCELLED:
+        return 'CANCELLED';
+      default:
+        throw ArgumentError("Unknown LessonStatus: $status");
+    }
+  }
+
+  String typesToString(List<LessonType> types) {
+    return types.map((type) => type.toString()).join(', ');
+  }
+
+  static List<LessonType> typesFromString(List<dynamic> data) {
+    List<LessonType> lessonTypes = [];
+    for (var typeName in data) {
+      switch (typeName) {
+        case "Лекция":
+          lessonTypes.add(LessonType.LECTURE);
+          break;
+        case "Практическое занятие":
+          lessonTypes.add(LessonType.PRACTICE);
+          break;
+        case "Лабораторная работа":
+          lessonTypes.add(LessonType.LABORATORY);
+          break;
+        case "Консультация":
+          lessonTypes.add(LessonType.CONSULTATION);
+          break;
+        case "Зачёт":
+          lessonTypes.add(LessonType.CREDIT);
+          break;
+        case "Экзамен":
+          lessonTypes.add(LessonType.EXAM);
+          break;
+        default:
+          break;
+      }
+    }
+    return lessonTypes;
+  }
+
+
+  static List<Group> groupsFromList(List<dynamic> groupsData) {
+    List<Group> groupsList = [];
+    for (var groupData in groupsData) {
+      groupsList.add(Group(
+        id: groupData['id'],
+        name: groupData['name'],
+        course: groupData['course'],
+        faculty: groupData['faculty'],
+        type: GroupType.fromString(groupData['type']),
+      ));
+    }
+    return groupsList;
+  }
+
+  static List<Professor> professorsFromList(List<dynamic> professorsData) {
+    List<Professor> professorsList = [];
+    for (var professorData in professorsData) {
+      professorsList.add(Professor(
+        professorData['id'],
+        professorData['lastName'],
+        professorData['firstName'],
+        professorData['middleName'],
+        professorData['siteId'],
+      ));
+    }
+    return professorsList;
+  }
+
+  factory Lesson.fromMap(Map<String, dynamic> map) {
+    List<LessonType> types = [];
+    for (var type in map['types']) {
+      types.add(LessonType.fromString(type));
+    }
+
+    List<Group> groups = [];
+    for (var group in map['groups']) {
+      groups.add(Group.fromMap(group));
+    }
+
+    List<Professor> professors = [];
+    for (var professor in map['professors']) {
+      professors.add(Professor.fromMap(professor));
+    }
+
+    LessonStatus status;
+    switch (map['status']) {
+      case 'CREATED':
+        status = LessonStatus.CREATED;
+        break;
+      case 'SAVED':
+        status = LessonStatus.SAVED;
+        break;
+      case 'CANCELLED':
+        status = LessonStatus.CANCELLED;
+        break;
+      default:
+        status = LessonStatus.SAVED;
+        break;
+    }
+
     return Lesson(
       map['id'],
       map['name'],
-      typeFromString(map['type']),
-      map['day'],
-      map['timeStart'],
-      map['timeEnd'],
-      await groupsFromString(map['groups']),
-      await professorsFromString(map['professors']),
-      roomsFromString(map['rooms']),
-      map['status'],
+      types,
+      DateTime.parse(map['date']),
+      DateTime.parse(map['timeStart']),
+      DateTime.parse(map['timeEnd']),
+      groups,
+      professors,
+      List<String>.from(map['rooms']),
+      status,
     );
   }
+
+
+  static LessonStatus statusFromString(String status) {
+    switch (status) {
+      case "CREATED":
+        return LessonStatus.CREATED;
+      case "SAVED":
+        return LessonStatus.SAVED;
+      case "CANCELLED":
+        return LessonStatus.CANCELLED;
+      default:
+        throw ArgumentError("Unknown LessonStatus: $status");
+    }
+  }
+
+
 
   static List<String> roomsFromString(String data) {
     data = data.replaceAll('[', '').replaceAll(']', '');
@@ -113,5 +236,10 @@ class Lesson {
     List<Professor> groupsList = await Future.wait(futureGroups);
 
     return groupsList.toSet();
+  }
+
+  static DateTime parseTime(String timeString) {
+    final format = DateFormat('HH:mm:ss');
+    return format.parse(timeString);
   }
 }

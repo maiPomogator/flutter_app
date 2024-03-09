@@ -35,7 +35,6 @@ class Note {
 
 
   Future<Note> fromMap(Map<String, dynamic> map) async {
-    LessonsDatabase ls = LessonsDatabase();
     return Note(
       map['id'],
       DateTime.parse(map['targetTimestamp']),
@@ -45,7 +44,7 @@ class Note {
       map['isCompleted'] == 1 ? true : false,
       map['isImportant'] == 1 ? true : false,
       map.containsKey('lessonId') && map['lessonId'] != null
-          ? await ls.getLessonById(map['lessonId'])
+          ? await LessonsDatabase.getLessonById(map['lessonId'])
           : null,
     );
   }

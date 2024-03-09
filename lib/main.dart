@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_mobile_client/FirstChoiceScreen.dart';
 import 'package:flutter_mobile_client/MainScreen.dart';
 import 'package:flutter_mobile_client/data/GroupDatabaseHelper.dart';
+import 'package:flutter_mobile_client/data/LessonsDatabase.dart';
 import 'package:flutter_mobile_client/data/NoteDatabase.dart';
 import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'data/SheduleList.dart';
@@ -18,6 +19,7 @@ Future<void> main() async {
   await ScheduleList.instance.initializeDatabase();
   await ProfessorDatabase.initDatabase();
   await GroupDatabaseHelper.initDatabase();
+  await LessonsDatabase.initDatabase();
   runApp(const MyApp());
 }
 

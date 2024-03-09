@@ -5,69 +5,70 @@ import 'package:path/path.dart';
 import '../model/Lesson.dart';
 
 class LessonsDatabase {
-  Database? _database;
+  static Database? _database;
+  static const String tableName = 'lessons';
 
-  Future<void> _openDatabase() async {
-    if (_database != null) return;
+  static Future<Database> get database async {
+    if (_database != null) {
+      return _database!;
+    }
 
-    final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, 'lessons.db');
-
-    _database = await openDatabase(
-      path,
-      version: 1,
-      onCreate: (db, version) {
-        return db.execute('''
-          CREATE TABLE lessons(
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            type TEXT,
-            day TEXT,
-            timeStart TEXT,
-            timeEnd TEXT,
-            groups TEXT,
-            professors TEXT,
-            rooms TEXT,
-            status TEXT
-          )
-        ''');
-      },
-    );
+    _database = await initDatabase();
+    return _database!;
   }
 
-  Future<void> insertLesson(Lesson lesson) async {
-    await _openDatabase();
-    await _database!.insert(
-      'lessons',
-      lesson.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+  static Future<Database> initDatabase() async {
+    String path = join(await getDatabasesPath(), 'lessons.db');
+
+    return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
-  Future<List<Lesson>> getLessons() async {
-    await _openDatabase();
-    final List<Map<String, dynamic>> maps = await _database!.query('lessons');
+  static Future<void> _onCreate(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS $tableName (
+        id INTEGER PRIMARY KEY,
+        name TEXT,
+        types TEXT,
+        date TEXT,
+        timeStart TEXT,
+        timeEnd TEXT,
+        groups TEXT,
+        professors TEXT,
+        rooms TEXT,
+        status TEXT
+      )
+    ''');
+  }
+
+  static Future<void> insertLesson(Lesson lesson) async {
+    final Database db = await database;
+    await db.insert(tableName, lesson.toMap());
+  }
+
+  static Future<List<Lesson>> getLessons() async {
+    final Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(tableName);
     List<Lesson> lessons = [];
     for (var map in maps) {
-      lessons.add(await Lesson.fromMap(map));
+      lessons.add(Lesson.fromMap(map));
     }
 
     return lessons;
   }
 
-  Future<void> deleteLesson(int id) async {
-    await _openDatabase();
-    await _database!.delete(
-      'lessons',
+  static Future<void> deleteLesson(int id) async {
+    final Database db = await database;
+    await db.delete(
+      tableName,
       where: 'id = ?',
       whereArgs: [id],
     );
   }
 
-  Future<Lesson?> getLessonById(int id) async {
-    await _openDatabase();
-    List<Map<String, dynamic>> maps = await _database!.query(
-      'lessons',
+  static Future<Lesson?> getLessonById(int id) async {
+    final Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(
+      tableName,
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -77,5 +78,23 @@ class LessonsDatabase {
     }
 
     return Lesson.fromMap(maps.first);
+  }
+
+  static Future<List<Lesson>> getLessonsOnDate(DateTime date) async {
+    final Database db = await database;
+    String dateString = date.toIso8601String().substring(0, 10);
+    List<Map<String, dynamic>> maps = await db.query(
+      tableName,
+      where: 'date LIKE ?',
+      whereArgs: ['$dateString%'],
+    );
+    List<Lesson> lessons = [];
+    for (var map in maps) {
+      lessons.add(Lesson.fromMap(map));
+    }
+
+    lessons.sort((a, b) => a.timeStart.compareTo(b.timeStart));
+
+    return lessons;
   }
 }

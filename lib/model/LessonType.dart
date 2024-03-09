@@ -23,4 +23,23 @@ class LessonType {
   String getFullName() {
     return name;
   }
+
+  static LessonType fromString(String typeName) {
+    switch (typeName) {
+      case "Лекция":
+        return LECTURE;
+      case "Практическое занятие":
+        return PRACTICE;
+      case "Лабораторная работа":
+        return LABORATORY;
+      case "Консультация":
+        return CONSULTATION;
+      case "Зачёт":
+        return CREDIT;
+      case "Экзамен":
+        return EXAM;
+      default:
+        throw ArgumentError("Invalid LessonType: $typeName");
+    }
+  }
 }

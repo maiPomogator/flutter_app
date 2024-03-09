@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../model/Group.dart';
 import '../model/GroupType.dart';
+import '../model/Lesson.dart';
 
 class ApiProvider {
   static String baseUrl = dotenv.env['ADDRESS'] ?? '';
@@ -109,27 +110,32 @@ class ApiProvider {
     }
   }
 
-  static void fetchLessonByGroup(int id) async {
+  static Future<List<Lesson>> fetchLessonByGroup(int id) async {
+    List<Lesson> lessons = [];
     try {
-      final response =
-          await http.get(Uri.parse('$baseUrl/mai/groups/{$id}/lessons'));
+      final response = await http.get(Uri.parse('$baseUrl/mai/groups/$id/lessons'));
       if (response.statusCode == 200) {
-        print(jsonDecode(response
-            .body)); //todo здесь на list переделать после запуска сервера
-        _attempted = false;
+        final List<dynamic> lessonDataList = jsonDecode(response.body);
+        for (final lessonData in lessonDataList) {
+          lessons.add(await Lesson.fromMap(lessonData));
+        }
       } else {
-        throw Exception(
-            'Failed to load data fetchLessonByGroup: ${response.statusCode}');
+        throw Exception('Failed to load data fetchLessonByGroup: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e address $baseUrl/mai/groups/{$id}/lessons');
+      print('Error occurred: $e address $baseUrl/mai/groups/$id/lessons');
       if (_attempted) {
         startFetchingPeriodically(() => fetchLessonByGroup(id));
       } else {
         _attempted = true;
       }
     }
+    print('length of lessons ${lessons.length}');
+    print(lessons.toString());
+    return lessons;
   }
+
+
 
   static void fetchProfessors() async {
     try {

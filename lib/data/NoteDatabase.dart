@@ -50,7 +50,7 @@ class NoteDatabase {
     for (var map in maps) {
       Lesson? lesson;
       if (map['lessonId'] != null) {
-        lesson = await LessonsDatabase().getLessonById(map['lessonId']);
+        lesson = await LessonsDatabase.getLessonById(map['lessonId']);
       }
       notes.add(Note(
         map['id'],
@@ -112,7 +112,7 @@ class NoteDatabase {
 
   Future<Lesson?> _getLessonById(int? lessonId) async {
     if (lessonId != null) {
-      return await LessonsDatabase().getLessonById(lessonId);
+      return await LessonsDatabase.getLessonById(lessonId);
     }
     return null;
   }

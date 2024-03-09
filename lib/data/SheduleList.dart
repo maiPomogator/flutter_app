@@ -54,4 +54,21 @@ class ScheduleList {
     final int result = Sqflite.firstIntValue(count)!;
     return result;
   }
+  Future<Map<String, dynamic>?> getMainSchedule() async {
+    List<Map<String, dynamic>> results = await _database.query(
+      'schedule_list',
+      columns: ['schedule_id', 'type', 'isMain'],
+      where: 'isMain = ?',
+      whereArgs: [true],
+      limit: 1, // Ограничиваем количество возвращаемых записей одной записью
+      orderBy: 'id DESC', // Убеждаемся, что записи возвращаются в нужном порядке
+    );
+
+    if (results.isNotEmpty) {
+      return results.first; // Возвращаем первую запись, если она есть
+    } else {
+      return null; // Возвращаем null, если не найдено записей
+    }
+  }
+
 }
