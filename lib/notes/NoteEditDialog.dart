@@ -47,7 +47,7 @@ class _NoteEditDialogState extends State<NoteEditDialog> {
           },
         ),
         title:
-            Text('Редактирование заметки', style: AppTextStyle.headerTextStyle),
+            Text('Редактирование заметки', style: AppTextStyle.headerTextStyle(context)),
         centerTitle: true,
       ),
       body: Padding(
@@ -99,7 +99,7 @@ class _NoteEditDialogState extends State<NoteEditDialog> {
               padding: EdgeInsets.only(top: 24),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Цвет', style: AppTextStyle.mainTextStyle),
+                child: Text('Цвет', style: AppTextStyle.mainTextStyle(context)),
               ),
             ),
             Row(
@@ -152,7 +152,7 @@ class _NoteEditDialogState extends State<NoteEditDialog> {
                 children: [
                   Text(
                     'Важная заметка',
-                    style: AppTextStyle.mainTextStyle,
+                    style: AppTextStyle.mainTextStyle(context),
                   ),
                   const Spacer(),
                   CupertinoSwitch(
@@ -182,7 +182,7 @@ class _NoteEditDialogState extends State<NoteEditDialog> {
                       child: Center(
                         child: Text(
                           'Сохранить',
-                          style: AppTextStyle.headerTextStyle,
+                          style: AppTextStyle.headerTextStyle(context),
                         ),
                       ),
                     ),
@@ -200,7 +200,7 @@ class _NoteEditDialogState extends State<NoteEditDialog> {
                       child: Center(
                         child: Text(
                           'Удалить',
-                          style: AppTextStyle.headerTextStyle,
+                          style: AppTextStyle.headerTextStyle(context),
                         ),
                       ),
                     ),

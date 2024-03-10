@@ -35,7 +35,7 @@ class _NoteCreationDialogState extends State<NoteCreationDialog> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text('Создание заметки', style: AppTextStyle.headerTextStyle),
+        title: Text('Создание заметки', style: AppTextStyle.headerTextStyle(context)),
         centerTitle: true,
       ),
       body: Padding(
@@ -87,7 +87,7 @@ class _NoteCreationDialogState extends State<NoteCreationDialog> {
               padding: EdgeInsets.only(top: 24),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Цвет', style: AppTextStyle.mainTextStyle),
+                child: Text('Цвет', style: AppTextStyle.mainTextStyle(context)),
               ),
             ),
             Row(
@@ -140,7 +140,7 @@ class _NoteCreationDialogState extends State<NoteCreationDialog> {
                 children: [
                   Text(
                     'Важная заметка',
-                    style: AppTextStyle.mainTextStyle,
+                    style: AppTextStyle.mainTextStyle(context),
                   ),
                   const Spacer(),
                   CupertinoSwitch(
@@ -169,7 +169,7 @@ class _NoteCreationDialogState extends State<NoteCreationDialog> {
                   child: Center(
                     child: Text(
                       'Сохранить',
-                      style: AppTextStyle.headerTextStyle,
+                      style: AppTextStyle.headerTextStyle(context),
                     ),
                   ),
                 ),

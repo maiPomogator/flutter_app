@@ -23,20 +23,56 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  static void updateTheme(BuildContext context) {
+    final _MyAppState state = context.findAncestorStateOfType<_MyAppState>()!;
+    state.updateTheme();
+  }
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late ThemeData _themeData;
+
+  @override
+  void initState() {
+    super.initState();
+    _themeData = _getThemeData(UserPreferences.getTheme());
+  }
+
+  void updateTheme() {
+    setState(() {
+      _themeData = _getThemeData(UserPreferences.getTheme());
+    });
+  }
+
+  ThemeData _getThemeData(String? themeName) {
+    switch (themeName) {
+      case 'Темная':
+        return ThemeData.dark();
+      case 'Светлая':
+        return ThemeData.light();
+      default:
+      // Системная тема
+        return ThemeData();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
+      theme: _themeData,
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
+
+
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});

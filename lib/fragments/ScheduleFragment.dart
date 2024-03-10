@@ -98,7 +98,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
               children: [
                 Text(
                   DateFormat('d MMMM', 'ru').format(currentDate),
-                  style: AppTextStyle.secondTextStyle,
+                  style: AppTextStyle.secondTextStyle(context),
                 ),
                 const Spacer(),
                 IconButton(
@@ -219,24 +219,24 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                               children: [
                                 Text(
                                   snapshot.data![index].name,
-                                  style: AppTextStyle.headerTextStyle,
+                                  style: AppTextStyle.headerTextStyle(context),
                                 ),
                                 Text(
                                   snapshot.data![index].types.map((type) => type.name).join(', '),
-                                  style: AppTextStyle.mainTextStyle,
+                                  style: AppTextStyle.mainTextStyle(context),
                                 ),
                                 Text(
                                   snapshot.data![index].groups.map((group) => group.name).join(', '),
-                                  style: AppTextStyle.secondTextStyle,
+                                  style: AppTextStyle.secondTextStyle(context),
                                 ),
                                 Text(
                                   snapshot.data![index].professors.map((professor) =>
                                   '${professor.middleName} ${professor.firstName} ${professor.lastName}').join(', '),
-                                  style: AppTextStyle.secondTextStyle,
+                                  style: AppTextStyle.secondTextStyle(context),
                                 ),
                                 Text(
                                   snapshot.data![index].rooms.join(', '),
-                                  style: AppTextStyle.secondTextStyle,
+                                  style: AppTextStyle.secondTextStyle(context),
                                 ),
                               ],
                             ),
@@ -270,7 +270,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
           padding: EdgeInsets.only(top: 8),
           child: Text(
             'Сегодня занятий нет - можно и отдохнуть',
-            style: AppTextStyle.mainTextStyle,
+            style: AppTextStyle.mainTextStyle(context),
           ),
         ),
       )

@@ -22,4 +22,12 @@ class UserPreferences {
   static String? getMainType() {
     return _preferences.getString('mainType');
   }
+
+  static String? getTheme() {
+    return _preferences.getString('theme');
+  }
+
+  static Future<void> setTheme(String theme) async {
+    await _preferences.setString('theme', theme);
+  }
 }

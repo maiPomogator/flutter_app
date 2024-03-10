@@ -70,7 +70,7 @@ class _NotesFragmentState extends State<NotesFragment> {
         children: [
           Text(
             "Заметки",
-            style: AppTextStyle.headerTextStyle,
+            style: AppTextStyle.headerTextStyle(context),
           ),
           Row(
             children: [
@@ -88,7 +88,7 @@ class _NotesFragmentState extends State<NotesFragment> {
                         bottom: BorderSide(
                           color: selectedType == NoteType.DAY
                               ? Color(0xFF143349)
-                              : Color(0x00000000),
+                              : Colors.transparent, // изменено для общей читаемости
                           width: 2.5,
                         ),
                       ),
@@ -98,8 +98,12 @@ class _NotesFragmentState extends State<NotesFragment> {
                         'На день',
                         style: TextStyle(
                           color: selectedType == NoteType.DAY
-                              ? Color(0xff1D1B20)
-                              : Color(0xff3C3C43),
+                              ? Theme.of(context).brightness == Brightness.light
+                              ? Color(0xff1D1B20) // Светлая тема
+                              : Colors.white // Темная тема
+                              : Theme.of(context).brightness == Brightness.light
+                              ? Color(0xff3C3C43) // Светлая тема
+                              : Colors.white, // Темная тема
                         ),
                       ),
                     ),
@@ -120,7 +124,7 @@ class _NotesFragmentState extends State<NotesFragment> {
                         bottom: BorderSide(
                           color: selectedType == NoteType.LESSON
                               ? Color(0xFF143349)
-                              : Color(0x00000000),
+                              : Colors.transparent, // изменено для общей читаемости
                           width: 2.5,
                         ),
                       ),
@@ -130,14 +134,19 @@ class _NotesFragmentState extends State<NotesFragment> {
                         'На пару',
                         style: TextStyle(
                           color: selectedType == NoteType.LESSON
-                              ? Color(0xff1D1B20)
-                              : Color(0xff3C3C43),
+                              ? Theme.of(context).brightness == Brightness.light
+                              ? Color(0xff1D1B20) // Светлая тема
+                              : Colors.white // Темная тема
+                              : Theme.of(context).brightness == Brightness.light
+                              ? Color(0xff3C3C43) // Светлая тема
+                              : Colors.white, // Темная тема
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
+
             ],
           ),
           SizedBox(
@@ -146,7 +155,7 @@ class _NotesFragmentState extends State<NotesFragment> {
               children: [
                 Text(
                   DateFormat('d MMMM', 'ru').format(currentDate),
-                  style: AppTextStyle.secondTextStyle,
+                  style: AppTextStyle.secondTextStyle(context),
                 ),
                 const Spacer(),
                 selectedType == NoteType.LESSON ?
@@ -316,7 +325,7 @@ class _NotesFragmentState extends State<NotesFragment> {
         ),
         Text(
           'Заметок пока нет - можешь их создать',
-          style: AppTextStyle.mainTextStyle,
+          style: AppTextStyle.mainTextStyle(context),
         ),
         Padding(
           padding: EdgeInsets.fromLTRB(16, 16, 0, 0),
@@ -333,7 +342,9 @@ class _NotesFragmentState extends State<NotesFragment> {
                     child: Center(
                       child: Text(
                         'Создать',
-                        style: AppTextStyle.headerTextStyle,
+                        style: TextStyle(
+                          color: Colors.black
+                        ),
                       ),
                     ),
                   ))

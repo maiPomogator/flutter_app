@@ -6,12 +6,19 @@ import 'package:flutter_mobile_client/data/UserPreferences.dart';
 import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../main.dart';
+
 class SettingsFragment extends StatefulWidget {
   @override
   _SettingsFragmentState createState() => _SettingsFragmentState();
 }
 
 class _SettingsFragmentState extends State<SettingsFragment> {
+  String _selectedTheme = UserPreferences.getTheme() == null
+      ? 'Светлая'
+      : UserPreferences
+          .getTheme()!;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -22,7 +29,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
             padding: EdgeInsets.only(top: 46),
             child: Text(
               "Настройки",
-              style: AppTextStyle.headerTextStyle,
+              style: AppTextStyle.headerTextStyle(context),
             ),
           ),
         ),
@@ -39,7 +46,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
           child: buildSettingsItem(
             'theme',
             'Тема',
-            'десь будет выбранное',
+            _selectedTheme,
           ),
         ),
         Padding(
@@ -60,55 +67,6 @@ class _SettingsFragmentState extends State<SettingsFragment> {
         ),
       ],
     );
-  }
-
-  Future<void> handleButtonTap(String buttonName) async {
-    switch (buttonName) {
-      case 'star':
-        break;
-      case 'theme':
-        break;
-      case 'telegram':
-        final String botUserName = dotenv.env['BOT_NAME'] ?? '';
-        Uri? url;
-        String message = 'кал';
-        try {
-          if (message != null && message != '') {
-            url = Uri.parse('https://t.me/$botUserName?start=uuid');
-          } else {
-            url = Uri.parse('https://t.me/$botUserName');
-          }
-          launchUrl(
-            url,
-            mode: LaunchMode.externalNonBrowserApplication,
-            webOnlyWindowName: botUserName,
-            webViewConfiguration: const WebViewConfiguration(
-              headers: <String, String>{
-                'User-Agent': 'Telegram',
-              },
-            ),
-          );
-          if (kDebugMode) {
-            if (message != null && message != '') {
-              print(
-                  '\x1B[32mSending message to $botUserName...\nMessage: $message\x1B[0m\nURL: https://t.me/$botUserName?text=${Uri.encodeFull(message)}');
-            } else {
-              print('\x1B[32mSending message to $botUserName...\x1B[0m');
-            }
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            print('\x1B[31mSending failed!\nError: $e\x1B[0m');
-          }
-        }
-
-        break;
-      case 'backup':
-        await showBackupOptions(context);
-        break;
-      default:
-        break;
-    }
   }
 
   Widget buildSettingsItem(
@@ -141,11 +99,11 @@ class _SettingsFragmentState extends State<SettingsFragment> {
                 children: [
                   Text(
                     title,
-                    style: AppTextStyle.mainTextStyle,
+                    style: AppTextStyle.mainTextStyle(context),
                   ),
                   Text(
                     subtitle,
-                    style: AppTextStyle.secondTextStyle,
+                    style: AppTextStyle.secondTextStyle(context),
                   ),
                 ],
               ),
@@ -155,6 +113,105 @@ class _SettingsFragmentState extends State<SettingsFragment> {
       ),
     );
   }
+
+  Future<void> handleButtonTap(String buttonName) async {
+    switch (buttonName) {
+      case 'star':
+        break;
+      case 'theme':
+        showThemeOptions(context);
+        break;
+      case 'telegram':
+        final String botUserName = dotenv.env['BOT_NAME'] ?? '';
+        Uri? url;
+        String message = 'кал';
+        try {
+          if (message != null && message != '') {
+            url = Uri.parse('https://t.me/$botUserName?start=uuid');
+          } else {
+            url = Uri.parse('https://t.me/$botUserName');
+          }
+          launchUrl(
+            url,
+            mode: LaunchMode.externalNonBrowserApplication,
+            webOnlyWindowName: botUserName,
+            webViewConfiguration: const WebViewConfiguration(
+              headers: <String, String>{
+                'User-Agent': 'Telegram',
+              },
+            ),
+          );
+          if (kDebugMode) {
+            if (message != '') {
+              print(
+                  '\x1B[32mSending message to $botUserName...\nMessage: $message\x1B[0m\nURL: https://t.me/$botUserName?text=${Uri.encodeFull(message)}');
+            } else {
+              print('\x1B[32mSending message to $botUserName...\x1B[0m');
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('\x1B[31mSending failed!\nError: $e\x1B[0m');
+          }
+        }
+        break;
+      case 'backup':
+        await showBackupOptions(context);
+        break;
+      default:
+        break;
+    }
+  }
+
+  Future<void> showThemeOptions(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Выберите тему'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text('Светлая'),
+                onTap: () {
+                  UserPreferences.setTheme('Светлая');
+                  setState(() {
+                    _selectedTheme = 'Светлая';
+                    MyApp.updateTheme(context);
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                title: Text('Темная'),
+                onTap: () {
+                  UserPreferences.setTheme('Темная');
+                  setState(() {
+                    _selectedTheme = 'Темная';
+                    MyApp.updateTheme(context);
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                title: Text('Системная'),
+                onTap: () {
+                  UserPreferences.setTheme('Системная');
+                  setState(() {
+                    _selectedTheme = 'Системная';
+                    MyApp.updateTheme(context);
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 
   Future<void> showBackupOptions(BuildContext context) async {
     return showDialog<void>(
