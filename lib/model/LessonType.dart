@@ -38,6 +38,18 @@ class LessonType {
         return CREDIT;
       case "Экзамен":
         return EXAM;
+      case "LECTURE":
+        return LECTURE;
+      case "PRACTICE":
+        return PRACTICE;
+      case 'LABORATORY':
+        return LABORATORY;
+      case "CONSULTATION":
+        return CONSULTATION;
+      case "CREDIT":
+        return CREDIT;
+      case "EXAM":
+        return EXAM;
       default:
         throw ArgumentError("Invalid LessonType: $typeName");
     }

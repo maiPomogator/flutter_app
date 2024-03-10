@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'package:flutter_mobile_client/model/LessonType.dart';
 import 'package:intl/intl.dart';
@@ -25,17 +27,56 @@ class Lesson {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'name': name,
-      'types': types.map((type) => type.name).toList(),
+      'id': int.parse(id.toString()),
+      'name': name.toString(),
+      'types': types.map((type) => type.name).toList().toString(),
       'date': date.toIso8601String(),
       'timeStart': timeStart.toIso8601String(),
       'timeEnd': timeEnd.toIso8601String(),
-      'groups': groups.map((group) => group.toMap()).toList(),
-      'professors': professors.map((professor) => professor.toMap()).toList(),
-      'rooms': rooms,
+      'groups': groups.map((group) => group.toMap()).toList().toString(),
+      'professors':
+          professors.map((professor) => professor.toMap()).toList().toString(),
+      'rooms': rooms.toString(),
       'status': status.toString(),
     };
+  }
+
+ static Lesson fromLocalMap(Map<String, dynamic> map) {
+    final List<String> typeNames = json.decode(map['types']).cast<String>();
+
+    final List<LessonType> lessonTypes =
+        typeNames.map((typeName) => LessonType.fromString(typeName)).toList(); //todo убрать квадратные скобки
+
+    final List<Map<String, dynamic>> groupMaps =
+        json.decode(map['groups']).cast<Map<String, dynamic>>();
+
+    final List<Group> groups =
+        groupMaps.map((groupMap) => Group.fromMap(groupMap)).toList();
+
+    final List<Map<String, dynamic>> professorMaps =
+        json.decode(map['professors']).cast<Map<String, dynamic>>();
+
+    final List<Professor> professors = professorMaps
+        .map((professorMap) => Professor.fromMap(professorMap))
+        .toList();
+
+    final List<String> rooms =
+        map['rooms'].substring(1, map['rooms'].length - 1).split(', ');
+
+    final LessonStatus status = lessonStatusFromString(map['status']);
+
+    return Lesson(
+      int.parse(map['id'].toString()),
+      map['name'].toString(),
+      lessonTypes,
+      DateTime.parse(map['date']),
+      DateTime.parse(map['timeStart']),
+      DateTime.parse(map['timeEnd']),
+      groups,
+      professors,
+      rooms,
+      status,
+    );
   }
 
   String statusToString(LessonStatus status) {
@@ -83,7 +124,6 @@ class Lesson {
     }
     return lessonTypes;
   }
-
 
   static List<Group> groupsFromList(List<dynamic> groupsData) {
     List<Group> groupsList = [];
@@ -144,21 +184,26 @@ class Lesson {
         status = LessonStatus.SAVED;
         break;
     }
+    String startTimeString = map['timeStart'];
+    String dateString = "2024-03-10";
+    String combinedStartDateTimeString = "$dateString $startTimeString";
+
+    String endTimeString = map['timeStart'];
+    String combinedEndDateTimeString = "$dateString $endTimeString";
 
     return Lesson(
       map['id'],
       map['name'],
       types,
       DateTime.parse(map['date']),
-      DateTime.parse(map['timeStart']),
-      DateTime.parse(map['timeEnd']),
+      DateTime.parse(combinedStartDateTimeString),
+      DateTime.parse(combinedEndDateTimeString),
       groups,
       professors,
       List<String>.from(map['rooms']),
       status,
     );
   }
-
 
   static LessonStatus statusFromString(String status) {
     switch (status) {
@@ -172,8 +217,6 @@ class Lesson {
         throw ArgumentError("Unknown LessonStatus: $status");
     }
   }
-
-
 
   static List<String> roomsFromString(String data) {
     data = data.replaceAll('[', '').replaceAll(']', '');

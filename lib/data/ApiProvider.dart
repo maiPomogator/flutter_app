@@ -117,7 +117,7 @@ class ApiProvider {
       if (response.statusCode == 200) {
         final List<dynamic> lessonDataList = jsonDecode(response.body);
         for (final lessonData in lessonDataList) {
-          lessons.add(await Lesson.fromMap(lessonData));
+          lessons.add(Lesson.fromMap(lessonData));
         }
       } else {
         throw Exception('Failed to load data fetchLessonByGroup: ${response.statusCode}');

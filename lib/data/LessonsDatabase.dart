@@ -42,7 +42,8 @@ class LessonsDatabase {
 
   static Future<void> insertLesson(Lesson lesson) async {
     final Database db = await database;
-    await db.insert(tableName, lesson.toMap());
+    Map<String, dynamic> lessons = lesson.toMap();
+    await db.insert(tableName, lessons);
   }
 
   static Future<List<Lesson>> getLessons() async {
@@ -90,7 +91,7 @@ class LessonsDatabase {
     );
     List<Lesson> lessons = [];
     for (var map in maps) {
-      lessons.add(Lesson.fromMap(map));
+      lessons.add(Lesson.fromLocalMap(map));
     }
 
     lessons.sort((a, b) => a.timeStart.compareTo(b.timeStart));
