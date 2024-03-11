@@ -41,34 +41,45 @@ class Lesson {
     };
   }
 
- static Lesson fromLocalMap(Map<String, dynamic> map) {
-    final List<String> typeNames = json.decode(map['types']).cast<String>();
+  static Lesson fromLocalMap(Map<String, dynamic> map) {
+    String typeNames = map['types'];
+    typeNames = typeNames.replaceAll('[', '');
+    typeNames = typeNames.replaceAll(']', '');
+    List<String> list = typeNames.split(', ');
+    List<LessonType> ls = [];
+    for ( int i=0 ; i<list.length; i++){
+     ls.add( LessonType.fromString(list[i]));
+    }
 
-    final List<LessonType> lessonTypes =
-        typeNames.map((typeName) => LessonType.fromString(typeName)).toList(); //todo убрать квадратные скобки
 
-    final List<Map<String, dynamic>> groupMaps =
-        json.decode(map['groups']).cast<Map<String, dynamic>>();
+    List<Group> groups = []; // Создаем пустой список, который будет заполняться объектами Group
+    String groupString = map['groups'];
+// Преобразуем строку JSON обратно в список объектов Group
+    List<Map<String, dynamic>> groupMaps = parseStringToListOfMaps(groupString);
+    for (Map<String, dynamic> map in groupMaps) {
+      Group group = Group.fromMap(map); // Используем метод fromMap для создания объекта Group из Map
+      groups.add(group); // Добавляем созданный объект Group в список
+    }
 
-    final List<Group> groups =
-        groupMaps.map((groupMap) => Group.fromMap(groupMap)).toList();
+    List<Professor> professors = []; // Создаем пустой список, который будет заполняться объектами Professor
 
-    final List<Map<String, dynamic>> professorMaps =
-        json.decode(map['professors']).cast<Map<String, dynamic>>();
+// Преобразуем строку JSON обратно в список объектов Professor
+    String professorString = map['professors'];
+    List<Map<String, dynamic>> professorMaps = parseStringToListOfMaps(professorString);
+    for (Map<String, dynamic> map in professorMaps) {
+      Professor professor = Professor.fromMap(map); // Используем метод fromMap для создания объекта Professor из Map
+      professors.add(professor); // Добавляем созданный объект Professor в список
+    }
 
-    final List<Professor> professors = professorMaps
-        .map((professorMap) => Professor.fromMap(professorMap))
-        .toList();
-
-    final List<String> rooms =
-        map['rooms'].substring(1, map['rooms'].length - 1).split(', ');
+    final String roomsString = map['rooms'];
+    List<String> rooms = roomsString.split(', ');
 
     final LessonStatus status = lessonStatusFromString(map['status']);
 
     return Lesson(
       int.parse(map['id'].toString()),
       map['name'].toString(),
-      lessonTypes,
+      ls,
       DateTime.parse(map['date']),
       DateTime.parse(map['timeStart']),
       DateTime.parse(map['timeEnd']),
@@ -77,6 +88,56 @@ class Lesson {
       rooms,
       status,
     );
+  }
+
+  static List<Map<String, dynamic>> parseStringToListOfMaps(String data) {
+    // Удаление квадратных скобок
+    data = data.replaceAll('[', '').replaceAll(']', '');
+
+    // Разделение строки на объекты Map
+    List<String> mapStrings = data.split('},{');
+
+    // Создание списка для хранения объектов Map
+    List<Map<String, dynamic>> mapsList = [];
+
+    // Обработка каждого объекта Map в строке
+    for (String mapString in mapStrings) {
+      // Добавление фигурных скобок в начале и конце каждой строки, чтобы преобразовать ее в объект Map
+      mapString = '{$mapString}';
+
+      // Преобразование строки в объект Map и добавление его в список
+      Map<String, dynamic> map = parseStringToMap(mapString);
+      mapsList.add(map);
+    }
+
+    return mapsList;
+  }
+
+  static Map<String, dynamic> parseStringToMap(String data) {
+    // Удаление ненужных символов
+    data = data.replaceAll('{', '').replaceAll('}', '');
+
+    // Разделение строки на пары ключ-значение
+    List<String> pairs = data.split(', ');
+
+    // Создание объекта Map и добавление пар ключ-значение
+    Map<String, dynamic> map = {};
+    for (String pair in pairs) {
+      // Разделение каждой пары на ключ и значение
+      List<String> keyValue = pair.split(': ');
+      String key = keyValue[0].trim();
+      dynamic value = keyValue[1].trim();
+
+      // Обработка значений типа строка
+      if (value.startsWith('Ð')) {
+        value = value.replaceAll('Ð', '');
+      }
+
+      // Добавление пары ключ-значение в Map
+      map[key] = value;
+    }
+
+    return map;
   }
 
   String statusToString(LessonStatus status) {
@@ -125,33 +186,6 @@ class Lesson {
     return lessonTypes;
   }
 
-  static List<Group> groupsFromList(List<dynamic> groupsData) {
-    List<Group> groupsList = [];
-    for (var groupData in groupsData) {
-      groupsList.add(Group(
-        id: groupData['id'],
-        name: groupData['name'],
-        course: groupData['course'],
-        faculty: groupData['faculty'],
-        type: GroupType.fromString(groupData['type']),
-      ));
-    }
-    return groupsList;
-  }
-
-  static List<Professor> professorsFromList(List<dynamic> professorsData) {
-    List<Professor> professorsList = [];
-    for (var professorData in professorsData) {
-      professorsList.add(Professor(
-        professorData['id'],
-        professorData['lastName'],
-        professorData['firstName'],
-        professorData['middleName'],
-        professorData['siteId'],
-      ));
-    }
-    return professorsList;
-  }
 
   factory Lesson.fromMap(Map<String, dynamic> map) {
     List<LessonType> types = [];
@@ -216,73 +250,5 @@ class Lesson {
       default:
         throw ArgumentError("Unknown LessonStatus: $status");
     }
-  }
-
-  static List<String> roomsFromString(String data) {
-    data = data.replaceAll('[', '').replaceAll(']', '');
-    List<String> roomsList = data.split(', ').map((String s) => s).toList();
-    return roomsList;
-  }
-
-  static List<LessonType> typeFromString(String data) {
-    data = data.replaceAll('[', '').replaceAll(']', '');
-    List<String> typeNames = data.split(', ');
-    List<LessonType> lessonTypes = [];
-    for (var typeName in typeNames) {
-      switch (typeName) {
-        case "Лекция":
-          lessonTypes.add(LessonType.LECTURE);
-          break;
-        case "Практическое занятие":
-          lessonTypes.add(LessonType.PRACTICE);
-          break;
-        case "Лабораторная работа":
-          lessonTypes.add(LessonType.LABORATORY);
-          break;
-        case "Консультация":
-          lessonTypes.add(LessonType.CONSULTATION);
-          break;
-        case "Зачёт":
-          lessonTypes.add(LessonType.CREDIT);
-          break;
-        case "Экзамен":
-          lessonTypes.add(LessonType.EXAM);
-          break;
-        default:
-          break;
-      }
-    }
-    return lessonTypes;
-  }
-
-  static Future<Set<Group>> groupsFromString(String data) async {
-    data = data.replaceAll('[', '').replaceAll(']', '');
-    List<int> groupIds =
-        data.split(', ').map((String s) => int.parse(s)).toList();
-
-    List<Future<Group>> futureGroups =
-        groupIds.map((id) => GroupDatabaseHelper.getGroupById(id)).toList();
-
-    List<Group> groupsList = await Future.wait(futureGroups);
-
-    return groupsList.toSet();
-  }
-
-  static Future<Set<Professor>> professorsFromString(String data) async {
-    data = data.replaceAll('[', '').replaceAll(']', '');
-    List<int> groupIds =
-        data.split(', ').map((String s) => int.parse(s)).toList();
-
-    List<Future<Professor>> futureGroups =
-        groupIds.map((id) => ProfessorDatabase.getProfessorById(id)).toList();
-
-    List<Professor> groupsList = await Future.wait(futureGroups);
-
-    return groupsList.toSet();
-  }
-
-  static DateTime parseTime(String timeString) {
-    final format = DateFormat('HH:mm:ss');
-    return format.parse(timeString);
   }
 }

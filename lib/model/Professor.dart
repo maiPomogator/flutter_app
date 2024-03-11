@@ -22,7 +22,7 @@ class Professor {
 
   factory Professor.fromMap(Map<String, dynamic> map) {
     return Professor(
-      map['id'],
+      int.parse(map['id'].toString()),
       map['lastName'],
       map['firstName'],
       map['middleName'],

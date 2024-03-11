@@ -26,12 +26,26 @@ class Group {
   }
 
   factory Group.fromMap(Map<String, dynamic> map) {
-    return Group(
-      id: map['id'],
-      name: map['name'],
-      course: map['course'],
-      faculty: map['faculty'],
-      type: GroupType.fromString(map['type']),
-    );
+    GroupType? type;
+    try {
+      type = GroupType.fromString(map['type']);
+
+      Group group = Group(
+        id: int.parse(map['id'].toString()),
+        name: map['name'],
+        course: int.parse(map['course'].toString()),
+        faculty: int.parse(map['faculty'].toString()),
+        type: type,
+      );
+
+      return group;
+    } catch (e) {
+      print('Ошибка при парсинге типа группы: $e');
+      throw Exception('Ошибка при создании группы из карты: $e');
+    }
   }
+
+
+
+
 }

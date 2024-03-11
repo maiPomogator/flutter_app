@@ -5,11 +5,11 @@ enum LessonStatus {
 }
 LessonStatus lessonStatusFromString(String statusString) {
   switch (statusString) {
-    case 'CREATED':
+    case 'LessonStatus.CREATED':
       return LessonStatus.CREATED;
-    case 'SAVED':
+    case 'LessonStatus.SAVED':
       return LessonStatus.SAVED;
-    case 'CANCELLED':
+    case 'LessonStatus.CANCELLED':
       return LessonStatus.CANCELLED;
     default:
       throw ArgumentError('Invalid LessonStatus string: $statusString');

@@ -17,7 +17,7 @@ class ApiProvider {
       final response = await http.get(
         Uri.parse('$baseUrl/mai/groups'),
         headers: {
-          "Accept-Charset": "utf-8",
+          "Accept-Charset": "ISO-8859-1 (Latin-1)",
           "Content-Type": "application/json; charset=utf-8"
         },
       );
