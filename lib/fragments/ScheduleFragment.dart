@@ -24,7 +24,8 @@ class ScheduleFragment extends StatefulWidget {
 }
 
 class _ScheduleFragmentState extends State<ScheduleFragment> {
-  String? _selectedGroup ;
+  String? _selectedGroup;
+
   late double fem;
   DateTime _selectedDate = DateTime.now();
   late DateTime currentDate;
@@ -39,7 +40,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
   }
 
   @override
-  void initState()  {
+  void initState() {
     currentDate = DateTime.now();
     monday = currentDate.subtract(Duration(days: currentDate.weekday - 1));
     weekDates = List.generate(7, (index) => monday.add(Duration(days: index)));
@@ -49,10 +50,10 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
     _initializeData();
   }
 
-
   Future<void> _initializeData() async {
     setState(() {
-      _isLoading = true; // Устанавливаем состояние загрузки в true перед загрузкой данных
+      _isLoading =
+          true; // Устанавливаем состояние загрузки в true перед загрузкой данных
     });
     try {
       groupList = await ScheduleList.instance.getScheduleList();
@@ -60,7 +61,8 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
       // Обработка ошибки загрузки данных, если необходимо
     } finally {
       setState(() {
-        _isLoading = false; // Устанавливаем состояние загрузки в false после завершения загрузки
+        _isLoading =
+            false; // Устанавливаем состояние загрузки в false после завершения загрузки
       });
     }
   }
@@ -117,48 +119,50 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                   for (int i = 0; i < weekDates.length; i++)
                     i == weekDates.length - 1
                         ? ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minWidth: 30,
-                        minHeight: 57,
-                      ),
-                      child: DayButton(
-                        date: weekDates[i],
-                        selectedDate: _selectedDate,
-                        onDateSelected: _onDateSelected,
-                      ),
-                    )
+                            constraints: BoxConstraints(
+                              minWidth: 30,
+                              minHeight: 57,
+                            ),
+                            child: DayButton(
+                              date: weekDates[i],
+                              selectedDate: _selectedDate,
+                              onDateSelected: _onDateSelected,
+                            ),
+                          )
                         : Row(
-                      children: [
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minWidth: 30,
-                            minHeight: 57,
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minWidth: 30,
+                                  minHeight: 57,
+                                ),
+                                child: DayButton(
+                                  date: weekDates[i],
+                                  selectedDate: _selectedDate,
+                                  onDateSelected: _onDateSelected,
+                                ),
+                              ),
+                              Spacing(width: spacing),
+                            ],
                           ),
-                          child: DayButton(
-                            date: weekDates[i],
-                            selectedDate: _selectedDate,
-                            onDateSelected: _onDateSelected,
-                          ),
-                        ),
-                        Spacing(width: spacing),
-                      ],
-                    ),
                 ],
               ),
             ),
           ),
-          FutureBuilder<List<Lesson>>(
-            future: LessonsDatabase.getLessonsOnDate(_selectedDate),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                return Column(
-                  children: [
-                    for (int index = 0; index < snapshot.data!.length; index++)
-                      Column(
+          Container(
+            height: 614,
+            child: FutureBuilder<List<Lesson>>(
+              future: LessonsDatabase.getLessonsOnDate(_selectedDate),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      return Column(
                         children: [
                           Row(
                             children: [
@@ -173,13 +177,16 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                                   ),
                                 ),
                                 child: Center(
-                                  child: Text((index + 1).toString()), // Вывод номера счета пары
+                                  child: Text(
+                                    (index + 1).toString(),
+                                    style: AppTextStyle.scheduleMain(context),
+                                  ),
                                 ),
                               ),
                               Padding(
                                 padding: EdgeInsets.only(left: 16),
                                 child: Text(
-                                  '${snapshot.data![index].timeStart} - ${snapshot.data![index].timeEnd}',
+                                  '${DateFormat('HH:mm').format(snapshot.data![index].timeStart)} - ${DateFormat('HH:mm').format(snapshot.data![index].timeEnd)}',
                                 ),
                               ),
                               Spacer(),
@@ -190,16 +197,18 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => NoteCreationDialog(
+                                        builder: (context) =>
+                                            NoteCreationDialog(
                                           currentDate: _selectedDate,
                                           type: NoteType.LESSON,
-                                          id:snapshot.data![index],
+                                          id: snapshot.data![index],
                                         ),
                                       ),
                                     );
                                   },
                                   child: ImageIcon(
-                                    AssetImage('assets/navigation/note_icon.png'),
+                                    AssetImage(
+                                        'assets/navigation/note_icon.png'),
                                     size: 24,
                                   ),
                                 ),
@@ -218,43 +227,48 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                               children: [
                                 Text(
                                   snapshot.data![index].name,
-                                  style: AppTextStyle.headerTextStyle(context),
+                                  style: AppTextStyle.scheduleHeader(context),
                                 ),
                                 Text(
-                                  snapshot.data![index].types.map((type) => type.name).join(', '),
-                                  style: AppTextStyle.mainTextStyle(context),
+                                  snapshot.data![index].types
+                                      .map((type) => type.name)
+                                      .join(', '),
+                                  style: AppTextStyle.scheduleMain(context),
                                 ),
                                 Text(
-                                  snapshot.data![index].groups.map((group) => group.name).join(', '),
-                                  style: AppTextStyle.secondTextStyle(context),
+                                  snapshot.data![index].groups
+                                      .map((group) => group.name)
+                                      .join(', '),
+                                  style: AppTextStyle.scheduleSecond(context),
                                 ),
                                 Text(
-                                  snapshot.data![index].professors.map((professor) =>
-                                  '${professor.middleName} ${professor.firstName} ${professor.lastName}').join(', '),
-                                  style: AppTextStyle.secondTextStyle(context),
+                                  snapshot.data![index].professors
+                                      .map((professor) =>
+                                          '${professor.lastName} ${professor.firstName} ${professor.middleName}')
+                                      .join(', '),
+                                  style: AppTextStyle.scheduleSecond(context),
                                 ),
                                 Text(
                                   snapshot.data![index].rooms.join(', '),
-                                  style: AppTextStyle.secondTextStyle(context),
+                                  style: AppTextStyle.scheduleSecond(context),
                                 ),
                               ],
                             ),
                           ),
                         ],
-                      ),
-                  ],
-                );
-              } else {
-                return noPairs();
-              }
-            },
-          ),
-
+                      );
+                    },
+                  );
+                } else {
+                  return noPairs();
+                }
+              },
+            ),
+          )
         ],
       ),
     );
   }
-
 
   Widget noPairs() {
     return Column(children: [
@@ -351,10 +365,10 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
     );
   }
 
-
   Future<List<DropdownMenuItem<String>>> _buildDropdownItems() async {
     final dropdownItems = <DropdownMenuItem<String>>[];
-    String mainSelectedValue = ''; // Для хранения значения записи с isMain == true
+    String mainSelectedValue =
+        ''; // Для хранения значения записи с isMain == true
     for (final group in groupList) {
       final scheduleId = group['schedule_id'];
       dynamic aboutData;
@@ -370,8 +384,10 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
           value: dropdownValue,
           child: Row(
             children: [
-              if (isMain) Icon(Icons.star), // Добавляем звездочку, если isMain == true
-              SizedBox(width: 5), // Добавляем небольшой отступ
+              if (isMain) Icon(Icons.star),
+              // Добавляем звездочку, если isMain == true
+              SizedBox(width: 5),
+              // Добавляем небольшой отступ
               group['type'] == 'group'
                   ? Text((aboutData as Group).name)
                   : Text((aboutData as Professor).lastName),
@@ -385,12 +401,11 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
       }
     }
     if (mainSelectedValue.isNotEmpty) {
-      _onGroupChanged(mainSelectedValue); // Устанавливаем запись с isMain == true в выбранные
+      _onGroupChanged(
+          mainSelectedValue); // Устанавливаем запись с isMain == true в выбранные
     }
     return dropdownItems;
   }
-
-
 
   void _onGroupChanged(String selectedGroup) {
     setState(() {
@@ -408,6 +423,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
               .add(Duration(days: index)));
     });
   }
+
   Future<void> _initializeSelectedGroup() async {
     // Получаем значение записи с isMain == true из базы данных или другого источника
     final mainGroup = await ScheduleList.instance.getMainSchedule();

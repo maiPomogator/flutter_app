@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobile_client/data/UserPreferences.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../model/Lesson.dart';
 import '../model/Note.dart';
@@ -17,7 +18,7 @@ class JsonBackup {
     try {
       List<Note> allNotes = await NoteDatabase.instance.getNotes();
       List<Map<String, dynamic>> notesJson =
-          allNotes.map((note) => note.toMap()).toList();
+      allNotes.map((note) => note.toMap()).toList();
 
       Map<String, dynamic> additionalInfo = {
         'otherValue': UserPreferences.getMainType(),
@@ -30,21 +31,20 @@ class JsonBackup {
 
       String jsonContent = jsonEncode(jsonData);
 
-      Directory? downloadsDirectory;
-      try {
-        downloadsDirectory = await getExternalStorageDirectory();
-      } on PlatformException catch (e) {
-        print("Ошибка при получении папки загрузок: $e");
-      }
+      // Получение директории загрузок
+      Directory? downloadsDirectory = await getExternalStorageDirectory();
+      String downloadsPath = downloadsDirectory!.path;
 
-      if (downloadsDirectory == null) {
-        print("Папка загрузок не найдена");
+      File file = File(filePath);
+
+      // Проверка разрешения на запись файлов
+      bool permissionStatus = await Permission.storage.isGranted;
+      if (!permissionStatus) {
+        // Если разрешение не предоставлено, запросите его и верните
+        await Permission.storage.request();
         return;
       }
 
-      print(filePath);
-
-      File file = File(filePath);
       await file.writeAsString(jsonContent);
     } catch (e) {
       print('Ошибка при сохранении JSON: $e');

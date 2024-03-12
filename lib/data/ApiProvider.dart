@@ -16,13 +16,10 @@ class ApiProvider {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/mai/groups'),
-        headers: {
-          "Accept-Charset": "ISO-8859-1 (Latin-1)",
-          "Content-Type": "application/json; charset=utf-8"
-        },
       );
+      String source = Utf8Decoder().convert(response.bodyBytes);
       if (response.statusCode == 200) {
-        final List<dynamic> jsonData = jsonDecode(response.body);
+        final List<dynamic> jsonData = jsonDecode(source);
         final List<Group> groups = jsonData.map((json) {
           return Group(
             id: json['id'],
@@ -54,13 +51,11 @@ class ApiProvider {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/mai/groups?course=$course&faculty=$faculty'),
-        headers: {
-          "Accept-Charset": "utf-8",
-          "Content-Type": "application/json; charset=utf-8"
-        },
       );
+      String source = Utf8Decoder().convert(response.bodyBytes);
+      print(source);
       if (response.statusCode == 200) {
-        final List<dynamic> jsonData = jsonDecode(response.body);
+        final List<dynamic> jsonData = jsonDecode(source);
         final List<Group> groups = jsonData.map((json) {
           return Group(
             id: json['id'],
@@ -91,8 +86,9 @@ class ApiProvider {
   static Future<Group> fetchGroupById(int id) async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/mai/groups/$id'));
+      String source = Utf8Decoder().convert(response.bodyBytes);
       if (response.statusCode == 200) {
-        final parsed = jsonDecode(response.body);
+        final parsed = jsonDecode(source);
         _attempted = false;
         return Group.fromMap(parsed);
       } else {
@@ -114,8 +110,9 @@ class ApiProvider {
     List<Lesson> lessons = [];
     try {
       final response = await http.get(Uri.parse('$baseUrl/mai/groups/$id/lessons'));
+      String source = Utf8Decoder().convert(response.bodyBytes);
       if (response.statusCode == 200) {
-        final List<dynamic> lessonDataList = jsonDecode(response.body);
+        final List<dynamic> lessonDataList = jsonDecode(source);
         for (final lessonData in lessonDataList) {
           lessons.add(Lesson.fromMap(lessonData));
         }
@@ -141,8 +138,8 @@ class ApiProvider {
     try {
       final response = await http.get(Uri.parse('$baseUrl/mai/professors'));
       if (response.statusCode == 200) {
-        print(jsonDecode(response
-            .body)); //todo здесь на list переделать после запуска сервера
+        String source = Utf8Decoder().convert(response.bodyBytes);
+        print(jsonDecode(source)); //todo здесь на list переделать после запуска сервера
         _attempted = false;
       } else {
         throw Exception(
@@ -163,8 +160,8 @@ class ApiProvider {
       final response =
           await http.get(Uri.parse('$baseUrl/mai/professors/{$id}'));
       if (response.statusCode == 200) {
-        print(jsonDecode(response
-            .body)); //todo здесь на list переделать после запуска сервера
+        String source = Utf8Decoder().convert(response.bodyBytes);
+        print(jsonDecode(source)); //todo здесь на list переделать после запуска сервера
         _attempted = false;
       } else {
         throw Exception(
@@ -185,8 +182,8 @@ class ApiProvider {
       final response =
           await http.get(Uri.parse('$baseUrl/mai/professors/{$id}/lessons'));
       if (response.statusCode == 200) {
-        print(jsonDecode(response
-            .body)); //todo здесь на list переделать после запуска сервера
+        String source = Utf8Decoder().convert(response.bodyBytes);
+        print(jsonDecode(source)); //todo здесь на list переделать после запуска сервера
         _attempted = false;
       } else {
         throw Exception(

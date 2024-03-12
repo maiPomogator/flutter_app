@@ -5,6 +5,7 @@ import 'package:flutter_mobile_client/data/JsonBackup.dart';
 import 'package:flutter_mobile_client/data/UserPreferences.dart';
 import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../main.dart';
 
@@ -214,34 +215,58 @@ class _SettingsFragmentState extends State<SettingsFragment> {
 
 
   Future<void> showBackupOptions(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Выберите опцию резервного копирования:'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                ElevatedButton(
-                  onPressed: () {
-                    JsonBackup.readJson();
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Импорт'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    JsonBackup.generateJson();
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Экспорт'),
-                ),
-              ],
+    if (await Permission.storage.request().isGranted) {
+      // Разрешение на запись файлов получено
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Выберите опцию резервного копирования:'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () {
+                      JsonBackup.readJson();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Импорт'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      JsonBackup.generateJson();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Экспорт'),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    } else {
+      // Разрешение на запись файлов не получено
+      showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Ошибка'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  const Text(
+                      'Для использования функции резервного копирования необходимо разрешение на запись файлов.'),
+                  const Text(
+                      'Пожалуйста, предоставьте приложению необходимое разрешение.'),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
   }
 }
