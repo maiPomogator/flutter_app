@@ -6,6 +6,7 @@ import 'package:flutter_mobile_client/data/GroupDatabaseHelper.dart';
 import 'package:flutter_mobile_client/data/LessonsDatabase.dart';
 import 'package:flutter_mobile_client/data/NoteDatabase.dart';
 import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
+import 'data/LocalDataBaseUpdater.dart';
 import 'data/SheduleList.dart';
 import 'data/UserPreferences.dart';
 
@@ -20,6 +21,7 @@ Future<void> main() async {
   await ProfessorDatabase.initDatabase();
   await GroupDatabaseHelper.initDatabase();
   await LessonsDatabase.initDatabase();
+  LocalDatabaseHelper.instance.populateAllLessonDatabase();
   runApp(const MyApp());
 }
 

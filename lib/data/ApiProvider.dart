@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_mobile_client/data/SheduleList.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/Group.dart';
@@ -109,7 +110,10 @@ class ApiProvider {
   static Future<List<Lesson>> fetchLessonByGroup(int id) async {
     List<Lesson> lessons = [];
     try {
-      final response = await http.get(Uri.parse('$baseUrl/mai/groups/$id/lessons'));
+      final startDate = SeasonDates.getStartDate();
+      final endDate = SeasonDates.getEndDate();
+
+      final response = await http.get(Uri.parse('$baseUrl/mai/groups/$id/lessons?startDate=$startDate&endDate=$endDate'));
       String source = Utf8Decoder().convert(response.bodyBytes);
       if (response.statusCode == 200) {
         final List<dynamic> lessonDataList = jsonDecode(source);
@@ -123,6 +127,43 @@ class ApiProvider {
       print('Error occurred: $e address $baseUrl/mai/groups/$id/lessons');
       if (_attempted) {
         startFetchingPeriodically(() => fetchLessonByGroup(id));
+      } else {
+        _attempted = true;
+      }
+    }
+    print('length of lessons ${lessons.length}');
+    print(lessons.toString());
+    return lessons;
+  }
+
+
+
+  static Future<List<Lesson>> fetchAllSchedule() async {
+    List<Lesson> lessons = [];
+    final startDate = SeasonDates.getStartDate();
+    final endDate = SeasonDates.getEndDate();
+    try {
+      final scheduleList = await ScheduleList.instance.getScheduleList();
+      for(int i = 0; i< scheduleList.length; i++){
+        if(scheduleList[i]['type']=='group'){
+          final response = await http.get(Uri.parse('$baseUrl/mai/groups/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate'));
+          String source = Utf8Decoder().convert(response.bodyBytes);
+          if (response.statusCode == 200) {
+            final List<dynamic> lessonDataList = jsonDecode(source);
+            for (final lessonData in lessonDataList) {
+              lessons.add(Lesson.fromMap(lessonData));
+            }
+          } else {
+            throw Exception('Failed to load data fetchLessonByGroup: ${response.statusCode}');
+          }
+        } else{
+
+        }
+      }
+    } catch (e) {
+      print('Error occurred in fetchAllSchedule: $e address $baseUrl/mai/groups//lessons');
+      if (_attempted) {
+        startFetchingPeriodically(() => fetchAllSchedule());
       } else {
         _attempted = true;
       }
@@ -207,5 +248,33 @@ class ApiProvider {
 
   static void dispose() {
     _timer?.cancel();
+  }
+}
+class SeasonDates {
+  static String getSeason() {
+    final now = DateTime.now();
+    if (now.month >= 9 || now.month <= 1) {
+      return 'fall_winter';
+    } else {
+      return 'spring_summer';
+    }
+  }
+
+  static String getStartDate() {
+    final season = getSeason();
+    if (season == 'fall_winter') {
+      return '${DateTime.now().year}-09-01';
+    } else {
+      return '${DateTime.now().year}-02-01';
+    }
+  }
+
+  static String getEndDate() {
+    final season = getSeason();
+    if (season == 'fall_winter') {
+      return '${DateTime.now().year + 1}-01-26';
+    } else {
+      return '${DateTime.now().year}-06-30';
+    }
   }
 }

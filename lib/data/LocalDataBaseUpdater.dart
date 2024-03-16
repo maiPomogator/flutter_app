@@ -36,6 +36,20 @@ class LocalDatabaseHelper {
       print('Stack trace: $stackTrace');
     }
   }
+
+  Future<void> populateAllLessonDatabase() async {
+    try {
+      List<Lesson> lessons = await ApiProvider.fetchAllSchedule();
+      for (Lesson lesson in lessons) {
+        await LessonsDatabase.insertLesson(lesson);
+      }
+    } catch (e, stackTrace) {
+      print('Error occurred while populating lesson database from server: $e');
+      print('Stack trace: $stackTrace');
+    }
+  }
+
+
 }
 
 //todo разобраться с логикой, она тут хромает

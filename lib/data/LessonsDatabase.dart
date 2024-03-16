@@ -43,7 +43,11 @@ class LessonsDatabase {
   static Future<void> insertLesson(Lesson lesson) async {
     final Database db = await database;
     Map<String, dynamic> lessons = lesson.toMap();
-    await db.insert(tableName, lessons);
+    await db.insert(
+      tableName,
+      lessons,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   static Future<List<Lesson>> getLessons() async {
