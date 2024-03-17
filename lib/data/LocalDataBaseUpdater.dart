@@ -4,10 +4,8 @@ import 'package:flutter_mobile_client/model/Group.dart';
 
 import '../model/Lesson.dart';
 import 'ApiProvider.dart';
-import 'package:http/http.dart' as http;
 
 class LocalDatabaseHelper {
-
   LocalDatabaseHelper._privateConstructor();
 
   static final LocalDatabaseHelper _instance =
@@ -48,8 +46,6 @@ class LocalDatabaseHelper {
       print('Stack trace: $stackTrace');
     }
   }
-
-
 }
 
 //todo разобраться с логикой, она тут хромает

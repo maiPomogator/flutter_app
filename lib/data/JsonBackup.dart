@@ -18,7 +18,7 @@ class JsonBackup {
     try {
       List<Note> allNotes = await NoteDatabase.instance.getNotes();
       List<Map<String, dynamic>> notesJson =
-      allNotes.map((note) => note.toMap()).toList();
+          allNotes.map((note) => note.toMap()).toList();
 
       Map<String, dynamic> additionalInfo = {
         'otherValue': UserPreferences.getMainType(),

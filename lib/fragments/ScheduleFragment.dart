@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobile_client/data/GroupDatabaseHelper.dart';
 import 'package:flutter_mobile_client/data/LessonsDatabase.dart';
+import 'package:flutter_mobile_client/data/NoteDatabase.dart';
 import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'package:flutter_mobile_client/data/SheduleList.dart';
 import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
@@ -9,6 +10,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import '../model/Group.dart';
 import '../model/Lesson.dart';
+import '../model/Note.dart';
 import '../model/NoteType.dart';
 import '../model/Professor.dart';
 import '../notes/NoteCreationDialog.dart';
@@ -34,6 +36,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
   late List<Map<String, dynamic>> groupList;
   dynamic aboutData;
   bool _isLoading = false;
+  late Future<List<Note>> importantNotes;
 
   _ScheduleFragmentState({required this.fem}) {
     initializeDateFormatting('ru', null);
@@ -48,6 +51,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
     initializeDateFormatting('ru', null);
     _initializeSelectedGroup();
     _initializeData();
+    importantNotes = NoteDatabase.instance.getImportantNotes();
   }
 
   Future<void> _initializeData() async {
@@ -123,10 +127,24 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                               minWidth: 30,
                               minHeight: 57,
                             ),
-                            child: DayButton(
-                              date: weekDates[i],
-                              selectedDate: _selectedDate,
-                              onDateSelected: _onDateSelected,
+                            child: FutureBuilder<List<Note>>(
+                              future: importantNotes,
+                              builder: (context, snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text(
+                                      'Произошла непредвиденная ошибка');
+                                } else if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  return DayButton(
+                                    date: weekDates[i],
+                                    selectedDate: _selectedDate,
+                                    onDateSelected: _onDateSelected,
+                                    importantNotes: snapshot.data,
+                                  );
+                                } else {
+                                  return Container();
+                                }
+                              },
                             ),
                           )
                         : Row(
@@ -136,10 +154,24 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                                   minWidth: 30,
                                   minHeight: 57,
                                 ),
-                                child: DayButton(
-                                  date: weekDates[i],
-                                  selectedDate: _selectedDate,
-                                  onDateSelected: _onDateSelected,
+                                child: FutureBuilder<List<Note>>(
+                                  future: importantNotes,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasError) {
+                                      return Text(
+                                          'Произошла непредвиденная ошибка');
+                                    } else if (snapshot.connectionState ==
+                                        ConnectionState.done) {
+                                      return DayButton(
+                                        date: weekDates[i],
+                                        selectedDate: _selectedDate,
+                                        onDateSelected: _onDateSelected,
+                                        importantNotes: snapshot.data,
+                                      );
+                                    } else {
+                                      return Container();
+                                    }
+                                  },
                                 ),
                               ),
                               Spacing(width: spacing),

@@ -43,7 +43,6 @@ class NoteDatabase {
     return await _database.insert('notes', note.toMap(excludeId: true));
   }
 
-
   Future<List<Note>> getNotes() async {
     final List<Map<String, dynamic>> maps = await _database.query('notes');
     List<Note> notes = [];
@@ -65,7 +64,6 @@ class NoteDatabase {
     }
     return notes;
   }
-
 
   Future<int> updateNote(Note note) async {
     return await _database
@@ -92,7 +90,8 @@ class NoteDatabase {
     return _extractNotesFromMapList(maps);
   }
 
-  Future<List<Note>> _extractNotesFromMapList(List<Map<String, dynamic>> maps) async {
+  Future<List<Note>> _extractNotesFromMapList(
+      List<Map<String, dynamic>> maps) async {
     List<Note> notes = [];
     for (var map in maps) {
       final Lesson? lesson = await _getLessonById(map['lessonId']);
@@ -116,6 +115,7 @@ class NoteDatabase {
     }
     return null;
   }
+
   Future<List<Note>> getNotesByDate(DateTime date) async {
     final formattedDate = date.toIso8601String().substring(0, 10);
     final List<Map<String, dynamic>> maps = await _database.query(
@@ -126,4 +126,12 @@ class NoteDatabase {
     return _extractNotesFromMapList(maps);
   }
 
+  Future<List<Note>> getImportantNotes() async {
+    final List<Map<String, dynamic>> maps = await _database.query(
+      'notes',
+      where: 'isImportant = ?',
+      whereArgs: [1],
+    );
+    return _extractNotesFromMapList(maps);
+  }
 }

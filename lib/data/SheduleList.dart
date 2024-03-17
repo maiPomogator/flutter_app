@@ -63,8 +63,7 @@ class ScheduleList {
       where: 'isMain = ?',
       whereArgs: [true],
       limit: 1,
-      orderBy:
-          'id DESC',
+      orderBy: 'id DESC',
     );
 
     if (results.isNotEmpty) {
@@ -74,7 +73,8 @@ class ScheduleList {
       return null;
     }
   }
-  Map<String, dynamic>? getMainSchedule(){
+
+  Map<String, dynamic>? getMainSchedule() {
     return mainSchedule;
   }
 }

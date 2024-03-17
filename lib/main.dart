@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> {
       case 'Светлая':
         return ThemeData.light();
       default:
-      // Системная тема
+        // Системная тема
         return ThemeData();
     }
   }
@@ -74,8 +74,6 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
-
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});

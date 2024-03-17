@@ -87,7 +87,8 @@ class LessonsDatabase {
     return Lesson.fromMap(maps.first);
   }
 
-  static Future<List<Lesson>> getLessonsOnDate(DateTime date, String? selectedSchedule) async {
+  static Future<List<Lesson>> getLessonsOnDate(
+      DateTime date, String? selectedSchedule) async {
     final Database db = await database;
     String dateString = date.toIso8601String().substring(0, 10);
 
@@ -96,22 +97,22 @@ class LessonsDatabase {
     int id = int.parse(idString);
     String type = parts[1];
     List<Map<String, dynamic>> maps = [];
-    if(type=='group') {
+    if (type == 'group') {
       String groupName = (await GroupDatabaseHelper.getGroupById(id)).name;
       maps = await db.query(
         tableName,
         where: 'date LIKE ? AND groups like ?',
         whereArgs: ['$dateString%', '%$groupName%'],
       );
-    } else{
-      String profName ='${(await ProfessorDatabase.getProfessorById(id)).lastName}';//todo если будет проблема, искать тут
-       maps = await db.query(
+    } else {
+      String profName =
+          '${(await ProfessorDatabase.getProfessorById(id)).lastName}'; //todo если будет проблема, искать тут
+      maps = await db.query(
         tableName,
         where: 'date LIKE ? AND professors like ?',
         whereArgs: ['$dateString%', '%$profName%'],
       );
     }
-
 
     List<Lesson> lessons = [];
     for (var map in maps) {

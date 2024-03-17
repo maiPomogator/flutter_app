@@ -113,7 +113,8 @@ class ApiProvider {
       final startDate = SeasonDates.getStartDate();
       final endDate = SeasonDates.getEndDate();
 
-      final response = await http.get(Uri.parse('$baseUrl/mai/groups/$id/lessons?startDate=$startDate&endDate=$endDate'));
+      final response = await http.get(Uri.parse(
+          '$baseUrl/mai/groups/$id/lessons?startDate=$startDate&endDate=$endDate'));
       String source = Utf8Decoder().convert(response.bodyBytes);
       if (response.statusCode == 200) {
         final List<dynamic> lessonDataList = jsonDecode(source);
@@ -121,7 +122,8 @@ class ApiProvider {
           lessons.add(Lesson.fromMap(lessonData));
         }
       } else {
-        throw Exception('Failed to load data fetchLessonByGroup: ${response.statusCode}');
+        throw Exception(
+            'Failed to load data fetchLessonByGroup: ${response.statusCode}');
       }
     } catch (e) {
       print('Error occurred: $e address $baseUrl/mai/groups/$id/lessons');
@@ -136,17 +138,16 @@ class ApiProvider {
     return lessons;
   }
 
-
-
   static Future<List<Lesson>> fetchAllSchedule() async {
     List<Lesson> lessons = [];
     final startDate = SeasonDates.getStartDate();
     final endDate = SeasonDates.getEndDate();
     try {
       final scheduleList = await ScheduleList.instance.getScheduleList();
-      for(int i = 0; i< scheduleList.length; i++){
-        if(scheduleList[i]['type']=='group'){
-          final response = await http.get(Uri.parse('$baseUrl/mai/groups/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate'));
+      for (int i = 0; i < scheduleList.length; i++) {
+        if (scheduleList[i]['type'] == 'group') {
+          final response = await http.get(Uri.parse(
+              '$baseUrl/mai/groups/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate'));
           String source = Utf8Decoder().convert(response.bodyBytes);
           if (response.statusCode == 200) {
             final List<dynamic> lessonDataList = jsonDecode(source);
@@ -154,14 +155,14 @@ class ApiProvider {
               lessons.add(Lesson.fromMap(lessonData));
             }
           } else {
-            throw Exception('Failed to load data fetchLessonByGroup: ${response.statusCode}');
+            throw Exception(
+                'Failed to load data fetchLessonByGroup: ${response.statusCode}');
           }
-        } else{
-
-        }
+        } else {}
       }
     } catch (e) {
-      print('Error occurred in fetchAllSchedule: $e address $baseUrl/mai/groups//lessons');
+      print(
+          'Error occurred in fetchAllSchedule: $e address $baseUrl/mai/groups//lessons');
       if (_attempted) {
         startFetchingPeriodically(() => fetchAllSchedule());
       } else {
@@ -173,14 +174,13 @@ class ApiProvider {
     return lessons;
   }
 
-
-
   static void fetchProfessors() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/mai/professors'));
       if (response.statusCode == 200) {
         String source = Utf8Decoder().convert(response.bodyBytes);
-        print(jsonDecode(source)); //todo здесь на list переделать после запуска сервера
+        print(jsonDecode(
+            source)); //todo здесь на list переделать после запуска сервера
         _attempted = false;
       } else {
         throw Exception(
@@ -202,7 +202,8 @@ class ApiProvider {
           await http.get(Uri.parse('$baseUrl/mai/professors/{$id}'));
       if (response.statusCode == 200) {
         String source = Utf8Decoder().convert(response.bodyBytes);
-        print(jsonDecode(source)); //todo здесь на list переделать после запуска сервера
+        print(jsonDecode(
+            source)); //todo здесь на list переделать после запуска сервера
         _attempted = false;
       } else {
         throw Exception(
@@ -224,7 +225,8 @@ class ApiProvider {
           await http.get(Uri.parse('$baseUrl/mai/professors/{$id}/lessons'));
       if (response.statusCode == 200) {
         String source = Utf8Decoder().convert(response.bodyBytes);
-        print(jsonDecode(source)); //todo здесь на list переделать после запуска сервера
+        print(jsonDecode(
+            source)); //todo здесь на list переделать после запуска сервера
         _attempted = false;
       } else {
         throw Exception(
@@ -250,6 +252,7 @@ class ApiProvider {
     _timer?.cancel();
   }
 }
+
 class SeasonDates {
   static String getSeason() {
     final now = DateTime.now();

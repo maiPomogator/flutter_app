@@ -1,12 +1,5 @@
-import 'dart:convert';
-
-import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'package:flutter_mobile_client/model/LessonType.dart';
-import 'package:intl/intl.dart';
-
-import '../data/GroupDatabaseHelper.dart';
 import 'Group.dart';
-import 'GroupType.dart';
 import 'LessonStatus.dart';
 import 'Professor.dart';
 

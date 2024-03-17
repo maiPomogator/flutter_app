@@ -19,7 +19,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
   late Future<String> mainScheduleName;
   late Future<List<String>> favoriteScheduleNames;
   final mainNavigationRoute =
-  MaterialPageRoute(builder: (context) => FirstChoiceScreen());
+      MaterialPageRoute(builder: (context) => FirstChoiceScreen());
 
   @override
   void initState() {
@@ -40,7 +40,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
         ),
         title: Text(
           'Избранное расписание',
-           style: AppTextStyle.headerTextStyle(context),
+          style: AppTextStyle.headerTextStyle(context),
         ),
         centerTitle: true,
       ),
@@ -74,20 +74,24 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                       ),
                       Text(
                         'Настрой рапсисание',
-                         style: AppTextStyle.settingsMain(context),
+                        style: AppTextStyle.settingsMain(context),
                       ),
                       Text(
                         'Основное будет отображено в меню,\nизбранное - в быстром доступе поиска',
-                         style: AppTextStyle.settingsSecond(context),
+                        style: AppTextStyle.settingsSecond(context),
                       ),
                     ],
                   )
                 ],
               ),
             ),
-            SizedBox(height: 16,),
-            Text('Основное расписание',
-              style: AppTextStyle.headerTextStyle(context),),
+            SizedBox(
+              height: 16,
+            ),
+            Text(
+              'Основное расписание',
+              style: AppTextStyle.headerTextStyle(context),
+            ),
             FutureBuilder<String>(
               future: mainScheduleName,
               builder: (context, snapshot) {
@@ -106,7 +110,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                       ),
                       child: Text(
                         snapshot.data ?? 'Нет выбранного',
-                         style: AppTextStyle.mainTextStyle(context),
+                        style: AppTextStyle.mainTextStyle(context),
                       ));
                 } else {
                   return Container();
@@ -117,7 +121,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
               padding: EdgeInsets.only(top: 16),
               child: Text(
                 'Избранное расписание',
-                 style: AppTextStyle.headerTextStyle(context),
+                style: AppTextStyle.headerTextStyle(context),
               ),
             ),
             Expanded(
@@ -143,7 +147,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                           ),
                           child: Text(
                             snapshot.data![index],
-                             style: AppTextStyle.mainTextStyle(context),
+                            style: AppTextStyle.mainTextStyle(context),
                           ),
                         );
                       },
@@ -155,8 +159,8 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 25,horizontal: 16),
-              child:   GestureDetector(
+              padding: EdgeInsets.symmetric(vertical: 25, horizontal: 16),
+              child: GestureDetector(
                 onTap: onFindTapped,
                 child: Container(
                   width: double.infinity,
@@ -180,7 +184,6 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
     );
   }
 
-
   Future<String> getMainScheduleName() async {
     if (ScheduleList.instance.mainSchedule != null) {
       if (ScheduleList.instance.mainSchedule!['type'] == 'group') {
@@ -197,28 +200,31 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
 
   Future<List<String>> getScheduleList() async {
     List<Map<String, dynamic>> scheduleList = [];
-    List<Map<String, dynamic>> notMain = await ScheduleList.instance.getScheduleList();
+    List<Map<String, dynamic>> notMain =
+        await ScheduleList.instance.getScheduleList();
 
-          for (int i = 0; i < notMain.length; i++) {
-            if (notMain[i]['isMain'] != 1) {
-              scheduleList.add(notMain[i]);
-            }
-          }
+    for (int i = 0; i < notMain.length; i++) {
+      if (notMain[i]['isMain'] != 1) {
+        scheduleList.add(notMain[i]);
+      }
+    }
     List<String> scheduleString = [];
-    for(int i=0; i<scheduleList.length;i++){
-      if(scheduleList[i]['type']=='group'){
-        Group group = await GroupDatabaseHelper.getGroupById(scheduleList[i]['schedule_id']);
+    for (int i = 0; i < scheduleList.length; i++) {
+      if (scheduleList[i]['type'] == 'group') {
+        Group group = await GroupDatabaseHelper.getGroupById(
+            scheduleList[i]['schedule_id']);
         scheduleString.add(group.name);
-      } else{
-        Professor professor = await ProfessorDatabase.getProfessorById(scheduleList[i]['schedule_id']);
-        scheduleString.add('${professor.middleName} ${professor.firstName} ${professor.lastName}');
+      } else {
+        Professor professor = await ProfessorDatabase.getProfessorById(
+            scheduleList[i]['schedule_id']);
+        scheduleString.add(
+            '${professor.middleName} ${professor.firstName} ${professor.lastName}');
       }
     }
     return scheduleString;
   }
-  void onFindTapped(){
-    Navigator.pushReplacement(
-        context, mainNavigationRoute);
-  }
 
+  void onFindTapped() {
+    Navigator.pushReplacement(context, mainNavigationRoute);
+  }
 }

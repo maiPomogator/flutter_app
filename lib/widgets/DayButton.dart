@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../model/Note.dart';
+
 class DayButton extends StatefulWidget {
   final DateTime date;
   final DateTime selectedDate;
   final Function(DateTime) onDateSelected;
+  final List<Note>? importantNotes;
 
   DayButton({
     required this.date,
     required this.selectedDate,
     required this.onDateSelected,
+    required this.importantNotes
   });
 
   @override
@@ -17,10 +21,20 @@ class DayButton extends StatefulWidget {
 }
 
 class _DayButtonState extends State<DayButton> {
+  bool haveImportant = false;
   @override
   Widget build(BuildContext context) {
     bool isSelected = widget.selectedDate.weekday == widget.date.weekday;
     bool isToday = DateTime.now().day == widget.date.day;
+    if(widget.importantNotes!=null){
+      for(int i=0;i<widget.importantNotes!.length;i++){
+        if (widget.importantNotes![i].targetTimestamp.year == widget.date.year &&
+            widget.importantNotes![i].targetTimestamp.month == widget.date.month &&
+            widget.importantNotes![i].targetTimestamp.day == widget.date.day) {
+          haveImportant = true;
+        }
+      }
+    }
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4),
@@ -57,6 +71,11 @@ class _DayButtonState extends State<DayButton> {
                 color: isSelected ? Colors.white : const Color(0xff333333),
               ),
             ),
+            haveImportant? Container(width: 5,height: 5,decoration: BoxDecoration(
+              color: Colors.red,
+              borderRadius: BorderRadius.circular(99),
+            ),
+            ): Container(width: 5,height: 5,),
           ],
         ),
       ),

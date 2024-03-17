@@ -132,7 +132,9 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
                                     int.parse(dropdownGroupValue!),
                                     'group',
                                     countOfGroups > 0 ? false : true);
-                               await LocalDatabaseHelper.instance.populateGroupDatabaseFromServerById(int.parse(dropdownGroupValue!));
+                                await LocalDatabaseHelper.instance
+                                    .populateGroupDatabaseFromServerById(
+                                        int.parse(dropdownGroupValue!));
                                 setState(() {
                                   Navigator.pushReplacement(
                                       context, mainNavigationRoute);
@@ -222,5 +224,4 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
       _selectedIndex = index;
     });
   }
-
 }
