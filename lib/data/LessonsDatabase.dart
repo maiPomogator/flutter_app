@@ -106,7 +106,7 @@ class LessonsDatabase {
       );
     } else {
       String profName =
-          '${(await ProfessorDatabase.getProfessorById(id)).lastName}'; //todo если будет проблема, искать тут
+          '${(await ProfessorDatabase.getProfessorById(id)).lastName}';
       maps = await db.query(
         tableName,
         where: 'date LIKE ? AND professors like ?',

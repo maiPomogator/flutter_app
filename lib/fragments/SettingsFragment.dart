@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_mobile_client/data/GroupDatabaseHelper.dart';
 import 'package:flutter_mobile_client/data/JsonBackup.dart';
+import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'package:flutter_mobile_client/data/SheduleList.dart';
 import 'package:flutter_mobile_client/data/UserPreferences.dart';
 import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
@@ -98,7 +99,9 @@ class _SettingsFragmentState extends State<SettingsFragment> {
             ScheduleList.instance.mainSchedule!['schedule_id']);
         return group.name;
       } else {
-        return "препод";
+        final professor = await ProfessorDatabase.getProfessorById(
+            ScheduleList.instance.mainSchedule!['schedule_id']);
+        return '${professor.lastName} ${professor.firstName} ${professor.middleName}';
       }
     } else {
       return "Нет выбранного";

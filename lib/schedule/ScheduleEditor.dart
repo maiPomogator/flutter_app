@@ -60,7 +60,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                 children: [
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15),
-                    child:Image.asset(
+                    child: Image.asset(
                       'assets/notes/important.png',
                       color: Colors.white,
                       width: 33,
@@ -192,7 +192,9 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
             ScheduleList.instance.mainSchedule!['schedule_id']);
         return group.name;
       } else {
-        return "препод";
+        final professor = await ProfessorDatabase.getProfessorById(
+            ScheduleList.instance.mainSchedule!['schedule_id']);
+        return '${professor.lastName} ${professor.firstName} ${professor.middleName}';
       }
     } else {
       return "Нет выбранного";

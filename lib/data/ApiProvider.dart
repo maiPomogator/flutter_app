@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_mobile_client/data/SheduleList.dart';
+import 'package:flutter_mobile_client/model/Professor.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/Group.dart';
@@ -158,7 +159,20 @@ class ApiProvider {
             throw Exception(
                 'Failed to load data fetchLessonByGroup: ${response.statusCode}');
           }
-        } else {}
+        } else {
+          final response = await http.get(Uri.parse(
+              '$baseUrl/mai/professors/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate'));
+          String source = Utf8Decoder().convert(response.bodyBytes);
+          if (response.statusCode == 200) {
+            final List<dynamic> lessonDataList = jsonDecode(source);
+            for (final lessonData in lessonDataList) {
+              lessons.add(Lesson.fromMap(lessonData));
+            }
+          } else {
+            throw Exception(
+                'Failed to load data fetchLessonByGroup: ${response.statusCode}');
+          }
+        }
       }
     } catch (e) {
       print(
@@ -174,40 +188,50 @@ class ApiProvider {
     return lessons;
   }
 
-  static void fetchProfessors() async {
+  static Future<List<Professor>> fetchProfessors() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/mai/professors'));
       if (response.statusCode == 200) {
         String source = Utf8Decoder().convert(response.bodyBytes);
-        print(jsonDecode(
-            source)); //todo здесь на list переделать после запуска сервера
+        print(jsonDecode(source));
+        final List<dynamic> jsonData = jsonDecode(source);
+        final List<Professor> professors = jsonData.map((json) {
+          return Professor(
+            json['id'],
+            json['lastName'],
+            json['firstName'],
+            json['middleName'],
+            json['siteId'],
+          );
+        }).toList();
         _attempted = false;
+        return professors;
       } else {
         throw Exception(
-            'Failed to load data fetchProfessors: ${response.statusCode}');
+            'Failed to load data fetchAllGroups: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e address $baseUrl/mai/professors');
+      print('Error occurred: $e address $baseUrl/mai/groups');
       if (_attempted) {
-        startFetchingPeriodically(() => fetchProfessors());
+        startFetchingPeriodically(fetchAllGroups);
       } else {
         _attempted = true;
       }
+      return [];
     }
   }
 
-  static void fetchProfessorById(int id) async {
+  static Future<Professor> fetchProfessorById(int id) async {
     try {
-      final response =
-          await http.get(Uri.parse('$baseUrl/mai/professors/{$id}'));
+      final response = await http.get(Uri.parse('$baseUrl/mai/professors/$id'));
+      String source = Utf8Decoder().convert(response.bodyBytes);
       if (response.statusCode == 200) {
-        String source = Utf8Decoder().convert(response.bodyBytes);
-        print(jsonDecode(
-            source)); //todo здесь на list переделать после запуска сервера
+        final parsed = jsonDecode(source);
         _attempted = false;
+        return Professor.fromMap(parsed);
       } else {
         throw Exception(
-            'Failed to load data fetchProfessorById: ${response.statusCode}');
+            'Failed to load data groupById: ${response.statusCode}');
       }
     } catch (e) {
       print('Error occurred: $e address $baseUrl/mai/professors/{$id}');
@@ -216,30 +240,38 @@ class ApiProvider {
       } else {
         _attempted = true;
       }
+      throw Exception('Error occurred while fetching group by id');
     }
   }
 
-  static void fetchLessonByProfessor(int id) async {
+  static Future<List<Lesson>> fetchLessonByProfessor(int id) async {
+    List<Lesson> lessons = [];
+    final startDate = SeasonDates.getStartDate();
+    final endDate = SeasonDates.getEndDate();
     try {
-      final response =
-          await http.get(Uri.parse('$baseUrl/mai/professors/{$id}/lessons'));
+      final response = await http.get(Uri.parse(
+          '$baseUrl/mai/professors/$id/lessons?startDate=$startDate&endDate=$endDate'));
       if (response.statusCode == 200) {
         String source = Utf8Decoder().convert(response.bodyBytes);
-        print(jsonDecode(
-            source)); //todo здесь на list переделать после запуска сервера
-        _attempted = false;
+        final List<dynamic> lessonDataList = jsonDecode(source);
+        for (final lessonData in lessonDataList) {
+          lessons.add(Lesson.fromMap(lessonData));
+        }
       } else {
         throw Exception(
-            'Failed to load data fetchLessonByProfessor: ${response.statusCode}');
+            'Failed to load data fetchLessonByGroup: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e address $baseUrl/mai/professors/{$id}/lessons');
+      print('Error occurred: $e address $baseUrl/mai/groups/$id/lessons');
       if (_attempted) {
-        startFetchingPeriodically(() => fetchLessonByProfessor(id));
+        startFetchingPeriodically(() => fetchLessonByGroup(id));
       } else {
         _attempted = true;
       }
     }
+    print('length of lessons ${lessons.length}');
+    print(lessons.toString());
+    return lessons;
   }
 
   static void startFetchingPeriodically(Function() fetchFunction) {

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobile_client/MainScreen.dart';
 import 'package:flutter_mobile_client/data/ApiProvider.dart';
+import 'package:flutter_mobile_client/model/Professor.dart';
+import 'package:levenshtein_distance/levenshtein_distance.dart';
+import 'dart:math';
 
 import 'data/LocalDataBaseUpdater.dart';
 import 'data/SheduleList.dart';
+import 'errors/ErrorDialog.dart';
 import 'model/Group.dart';
 
 class FirstChoiceScreen extends StatefulWidget {
@@ -16,7 +20,10 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
   String? dropdownCourseValue;
   String? dropdownFacultyValue;
   String? dropdownGroupValue;
+  int? selectedProfessor;
+  TextEditingController _labelFieldController = TextEditingController();
   bool search = false;
+  bool searchProf = false;
   final mainNavigationRoute =
       MaterialPageRoute(builder: (context) => MainScreen());
 
@@ -135,6 +142,7 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
                                 await LocalDatabaseHelper.instance
                                     .populateGroupDatabaseFromServerById(
                                         int.parse(dropdownGroupValue!));
+                                ScheduleList.instance.getMainScheduleIntoVar();
                                 setState(() {
                                   Navigator.pushReplacement(
                                       context, mainNavigationRoute);
@@ -159,10 +167,130 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
                   : Container(),
             ],
             if (_selectedIndex == 1) ...[
-              Text(
-                'Нет данных для преподавателя',
-                style: TextStyle(fontSize: 20),
+              TextField(
+                maxLines: 1,
+                textAlign: TextAlign.start,
+                controller: _labelFieldController,
+                decoration: InputDecoration(
+                  labelText: 'Введите ФИО',
+                  contentPadding: EdgeInsets.all(10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: BorderSide(
+                      color: Colors.black,
+                      width: 1,
+                    ),
+                  ),
+                ),
               ),
+              SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  if (_labelFieldController.text.isNotEmpty) {
+                    setState(() {
+                      searchProf = true;
+                    });
+                  } else {
+                    ErrorDialog.showError(context, 'Проверьте данные',
+                        'Проверьте заполнение поля Заголовок или основного текста');
+                  }
+                },
+                child: Container(
+                    decoration: BoxDecoration(color: Colors.blue),
+                    width: 120,
+                    height: 40,
+                    child: Center(
+                        child: Text(
+                      "Найти преподавателя",
+                      style: TextStyle(color: Colors.white),
+                    ))),
+              ),
+              SizedBox(height: 10),
+              searchProf
+                  ? FutureBuilder<List<Professor>>(
+                      future: ApiProvider.fetchProfessors(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text('Ошибка: ${snapshot.error}'),
+                          );
+                        } else {
+                          return Column(children: [
+                            FutureBuilder<List<Professor>>(
+                              future: searchProfessors(snapshot.data!),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return Center(
+                                    child: Text('Ошибка: ${snapshot.error}'),
+                                  );
+                                } else {
+                                  List<Professor> professors = snapshot.data!;
+                                  return DropdownButton<int>(
+                                    value: selectedProfessor,
+                                    hint: Text('Выберите преподавателя'),
+                                    items: professors
+                                        .map<DropdownMenuItem<int>>(
+                                            (professor) {
+                                      return DropdownMenuItem<int>(
+                                        value: professor.id,
+                                        child: Text(
+                                            '${professor.lastName} ${professor.firstName} ${professor.middleName}'),
+                                      );
+                                    }).toList(),
+                                    onChanged: (int? professorId) {
+                                      setState(() {
+                                        selectedProfessor = professorId;
+                                      });
+                                    },
+                                  );
+                                }
+                              },
+                            ),
+                            GestureDetector(
+                              onTap: () async {
+                                int countOfGroups =
+                                    await ScheduleList.instance.getCount();
+                                ScheduleList.instance.insertList(
+                                    int.parse(selectedProfessor.toString()),
+                                    'professor',
+                                    countOfGroups > 0 ? false : true);
+                                await LocalDatabaseHelper.instance
+                                    .populateProfessorDatabaseFromServerById(
+                                        int.parse(
+                                            selectedProfessor.toString()));
+                                ScheduleList.instance.getMainScheduleIntoVar();
+                                setState(() {
+                                  Navigator.pushReplacement(
+                                      context, mainNavigationRoute);
+                                });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(color: Colors.blue),
+                                width: 120,
+                                height: 40,
+                                child: Center(
+                                  child: Text(
+                                    "Выбрать преподавателя",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ]);
+                        }
+                      },
+                    )
+                  : Container(),
             ],
           ],
         ),
@@ -223,5 +351,44 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  List<String> generateNGrams(String text, int n) {
+    List<String> ngrams = [];
+    for (int i = 0; i <= text.length - n; i++) {
+      ngrams.add(text.substring(i, i + n));
+    }
+    return ngrams;
+  }
+
+  double ngramSimilarity(String text1, String text2, int n) {
+    Set<String> ngrams1 = generateNGrams(text1, n).toSet();
+    Set<String> ngrams2 = generateNGrams(text2, n).toSet();
+    int intersection = ngrams1.intersection(ngrams2).length;
+    int union = ngrams1.union(ngrams2).length;
+    return intersection / union;
+  }
+
+  Future<List<Professor>> searchProfessors(List<Professor> professors) async {
+    String professorName = _labelFieldController.text.toLowerCase();
+    List<Map<String, dynamic>> matches = [];
+
+    for (int i = 0; i < professors.length; i++) {
+      String profFullName =
+          '${professors[i].lastName} ${professors[i].firstName} ${professors[i].middleName}'
+              .toLowerCase();
+      double similarity = ngramSimilarity(professorName, profFullName, 2);
+      int distance = ((1 - similarity) * 10000).toInt();
+      matches.add({'professor': professors[i], 'distance': distance});
+    }
+
+    matches.sort((a, b) => a['distance'].compareTo(b['distance']));
+
+    List<Professor> bestMatches = [];
+    for (int i = 0; i < matches.length && i < 5; i++) {
+      bestMatches.add(matches[i]['professor']);
+    }
+
+    return bestMatches;
   }
 }

@@ -50,6 +50,7 @@ dependencies:
   file_picker: ^6.1.1
   uuid: ^4.3.2
   permission_handler: ^11.3.0
+  levenshtein_distance: ^1.0.0
 
 dev_dependencies:
   flutter_test:

@@ -61,7 +61,7 @@ class ScheduleList {
       'schedule_list',
       columns: ['schedule_id', 'type', 'isMain'],
       where: 'isMain = ?',
-      whereArgs: [true],
+      whereArgs: [1],
       limit: 1,
       orderBy: 'id DESC',
     );

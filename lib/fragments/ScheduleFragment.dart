@@ -456,9 +456,8 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
     });
   }
 
-  Future<void> _initializeSelectedGroup() async {
-    // Получаем значение записи с isMain == true из базы данных или другого источника
-    final mainGroup = await ScheduleList.instance.getMainSchedule();
+  void _initializeSelectedGroup() {
+    final mainGroup = ScheduleList.instance.getMainSchedule();
     if (mainGroup != null) {
       setState(() {
         _selectedGroup = '${mainGroup['schedule_id']} ${mainGroup['type']}';

@@ -1,6 +1,8 @@
 import 'package:flutter_mobile_client/data/GroupDatabaseHelper.dart';
 import 'package:flutter_mobile_client/data/LessonsDatabase.dart';
+import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'package:flutter_mobile_client/model/Group.dart';
+import 'package:flutter_mobile_client/model/Professor.dart';
 
 import '../model/Lesson.dart';
 import 'ApiProvider.dart';
@@ -46,6 +48,29 @@ class LocalDatabaseHelper {
       print('Stack trace: $stackTrace');
     }
   }
-}
 
-//todo разобраться с логикой, она тут хромает
+  Future<void> populateProfessorDatabaseFromServerById(int id) async {
+    try {
+      Professor response = await ApiProvider.fetchProfessorById(id);
+      populateLessonDatabaseFromServerByProfessor(response);
+      ProfessorDatabase.insertProfessor(response);
+    } catch (e) {
+      print('Error occurred while populateProfessorDatabaseFromServerById: $e');
+    }
+  }
+
+  Future<void> populateLessonDatabaseFromServerByProfessor(
+      Professor professor) async {
+    try {
+      List<Lesson> lessons =
+          await ApiProvider.fetchLessonByProfessor(professor.id);
+      for (Lesson lesson in lessons) {
+        await LessonsDatabase.insertLesson(lesson);
+      }
+    } catch (e, stackTrace) {
+      print(
+          'Error occurred while populateLessonDatabaseFromServerByProfessor: $e');
+      print('Stack trace: $stackTrace');
+    }
+  }
+}
