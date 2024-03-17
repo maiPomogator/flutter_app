@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobile_client/data/ApiProvider.dart';
 import 'package:flutter_mobile_client/data/GroupDatabaseHelper.dart';
 import 'package:flutter_mobile_client/data/LessonsDatabase.dart';
-import 'package:flutter_mobile_client/data/LocalDataBaseUpdater.dart';
 import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'package:flutter_mobile_client/data/SheduleList.dart';
 import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
@@ -369,8 +367,6 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
 
   Future<List<DropdownMenuItem<String>>> _buildDropdownItems() async {
     final dropdownItems = <DropdownMenuItem<String>>[];
-    String mainSelectedValue =
-        ''; // Для хранения значения записи с isMain == true
     for (final group in groupList) {
       final scheduleId = group['schedule_id'];
       dynamic aboutData;
@@ -380,7 +376,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
         aboutData = await ProfessorDatabase.getProfessorById(scheduleId);
       }
       final dropdownValue = '$scheduleId ${group['type']}';
-      final isMain = group['isMain'] == true;
+      final isMain = group['isMain'] == 1;
       dropdownItems.add(
         DropdownMenuItem<String>(
           value: dropdownValue,
@@ -398,14 +394,14 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
         ),
       );
       // Добавляем запись с isMain == true в selected
-      if (isMain) {
+    /*  if (isMain) {
         mainSelectedValue = dropdownValue;
-      }
+      }*/
     }
-    if (mainSelectedValue.isNotEmpty) {
+   /* if (mainSelectedValue.isNotEmpty) {
       _onGroupChanged(
           mainSelectedValue); // Устанавливаем запись с isMain == true в выбранные
-    }
+    }*/
     return dropdownItems;
   }
 

@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 
 class ScheduleList {
   late Database _database;
+  Map<String, dynamic>? mainSchedule;
 
   ScheduleList._privateConstructor();
 
@@ -54,21 +55,26 @@ class ScheduleList {
     final int result = Sqflite.firstIntValue(count)!;
     return result;
   }
-  Future<Map<String, dynamic>?> getMainSchedule() async {
+
+  Future<Map<String, dynamic>?> getMainScheduleIntoVar() async {
     List<Map<String, dynamic>> results = await _database.query(
       'schedule_list',
       columns: ['schedule_id', 'type', 'isMain'],
       where: 'isMain = ?',
       whereArgs: [true],
-      limit: 1, // Ограничиваем количество возвращаемых записей одной записью
-      orderBy: 'id DESC', // Убеждаемся, что записи возвращаются в нужном порядке
+      limit: 1,
+      orderBy:
+          'id DESC',
     );
 
     if (results.isNotEmpty) {
-      return results.first; // Возвращаем первую запись, если она есть
+      mainSchedule = results.first;
+      return results.first;
     } else {
-      return null; // Возвращаем null, если не найдено записей
+      return null;
     }
   }
-
+  Map<String, dynamic>? getMainSchedule(){
+    return mainSchedule;
+  }
 }

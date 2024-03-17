@@ -22,6 +22,7 @@ Future<void> main() async {
   await GroupDatabaseHelper.initDatabase();
   await LessonsDatabase.initDatabase();
   LocalDatabaseHelper.instance.populateAllLessonDatabase();
+  ScheduleList.instance.getMainScheduleIntoVar();
   runApp(const MyApp());
 }
 

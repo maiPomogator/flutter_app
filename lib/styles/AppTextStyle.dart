@@ -57,4 +57,28 @@ class AppTextStyle {
       color: Color(0x99000000)
     );
   }
+  static TextStyle settingsHeader(BuildContext context) {
+    return TextStyle(
+        fontSize: 16,
+        fontFamily: 'Roboto',
+        fontWeight: FontWeight.w500,
+        color:Colors.white
+    );
+  }
+  static TextStyle settingsMain(BuildContext context) {
+    return TextStyle(
+        fontSize: 16,
+        fontFamily: 'Roboto',
+        fontWeight: FontWeight.w400,
+        color: Colors.white
+    );
+  }
+  static TextStyle settingsSecond(BuildContext context) {
+    return TextStyle(
+        fontSize: 12,
+        fontFamily: 'Roboto',
+        fontWeight: FontWeight.w400,
+        color: Colors.white
+    );
+  }
 }

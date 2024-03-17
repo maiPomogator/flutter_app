@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_mobile_client/data/GroupDatabaseHelper.dart';
 import 'package:flutter_mobile_client/data/JsonBackup.dart';
+import 'package:flutter_mobile_client/data/SheduleList.dart';
 import 'package:flutter_mobile_client/data/UserPreferences.dart';
 import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../main.dart';
+import '../schedule/ScheduleEditor.dart';
 
 class SettingsFragment extends StatefulWidget {
   @override
@@ -17,57 +20,89 @@ class SettingsFragment extends StatefulWidget {
 class _SettingsFragmentState extends State<SettingsFragment> {
   String _selectedTheme = UserPreferences.getTheme() == null
       ? 'Светлая'
-      : UserPreferences
-          .getTheme()!;
+      : UserPreferences.getTheme()!;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Center(
-          child: Padding(
-            padding: EdgeInsets.only(top: 46),
-            child: Text(
-              "Настройки",
-              style: AppTextStyle.headerTextStyle(context),
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 24),
-          child: buildSettingsItem(
-            'star',
-            'Избранное расписания',
-            'десь будет выбранное',
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 16),
-          child: buildSettingsItem(
-            'theme',
-            'Тема',
-            _selectedTheme,
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 16),
-          child: buildSettingsItem(
-            'telegram',
-            'Привязать телеграм',
-            UserPreferences.getIsAuth() ? 'Привязано' : 'Не привязано',
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 16),
-          child: buildSettingsItem(
-            'backup',
-            'Импорт/экспорт данных',
-            'Перенос данных между устройствами',
-          ),
-        ),
-      ],
+    return FutureBuilder<String>(
+      future: getMainScheduleName(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError) {
+            return Text('Ошибка при получении данных');
+          } else {
+            final mainScheduleName = snapshot.data;
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 46),
+                    child: Text(
+                      "Настройки",
+                      style: AppTextStyle.headerTextStyle(context),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 24),
+                  child: buildSettingsItem(
+                    'star',
+                    'Избранное расписания',
+                    mainScheduleName!,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: buildSettingsItem(
+                    'theme',
+                    'Тема',
+                    _selectedTheme,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: buildSettingsItem(
+                    'telegram',
+                    'Привязать телеграм',
+                    UserPreferences.getIsAuth() ? 'Привязано' : 'Не привязано',
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: buildSettingsItem(
+                    'backup',
+                    'Импорт/экспорт данных',
+                    'Перенос данных между устройствами',
+                  ),
+                ),
+              ],
+            );
+          }
+        } else {
+          return Container();
+        }
+      },
     );
+  }
+
+  Future<String> getMainScheduleName() async {
+    if (ScheduleList.instance.mainSchedule != null) {
+      if (ScheduleList.instance.mainSchedule!['type'] == 'group') {
+        final group = await GroupDatabaseHelper.getGroupById(
+            ScheduleList.instance.mainSchedule!['schedule_id']);
+        return group.name;
+      } else {
+        return "препод";
+      }
+    } else {
+      return "Нет выбранного";
+    }
   }
 
   Widget buildSettingsItem(
@@ -118,6 +153,12 @@ class _SettingsFragmentState extends State<SettingsFragment> {
   Future<void> handleButtonTap(String buttonName) async {
     switch (buttonName) {
       case 'star':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ScheduleEditor(),
+          ),
+        );
         break;
       case 'theme':
         showThemeOptions(context);
@@ -212,7 +253,6 @@ class _SettingsFragmentState extends State<SettingsFragment> {
       },
     );
   }
-
 
   Future<void> showBackupOptions(BuildContext context) async {
     if (await Permission.storage.request().isGranted) {
