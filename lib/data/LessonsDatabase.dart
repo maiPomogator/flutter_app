@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter_mobile_client/data/GroupDatabaseHelper.dart';
+import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -85,14 +87,32 @@ class LessonsDatabase {
     return Lesson.fromMap(maps.first);
   }
 
-  static Future<List<Lesson>> getLessonsOnDate(DateTime date) async {
+  static Future<List<Lesson>> getLessonsOnDate(DateTime date, String? selectedSchedule) async {
     final Database db = await database;
     String dateString = date.toIso8601String().substring(0, 10);
-    List<Map<String, dynamic>> maps = await db.query(
-      tableName,
-      where: 'date LIKE ?',
-      whereArgs: ['$dateString%'],
-    );
+
+    List<String> parts = selectedSchedule!.split(" ");
+    String idString = parts[0];
+    int id = int.parse(idString);
+    String type = parts[1];
+    List<Map<String, dynamic>> maps = [];
+    if(type=='group') {
+      String groupName = (await GroupDatabaseHelper.getGroupById(id)).name;
+      maps = await db.query(
+        tableName,
+        where: 'date LIKE ? AND groups like ?',
+        whereArgs: ['$dateString%', '%$groupName%'],
+      );
+    } else{
+      String profName ='${(await ProfessorDatabase.getProfessorById(id)).lastName} ${(await ProfessorDatabase.getProfessorById(id)).firstName} ${(await ProfessorDatabase.getProfessorById(id)).middleName}';
+       maps = await db.query(
+        tableName,
+        where: 'date LIKE ? AND professors like ?',
+        whereArgs: ['$dateString%', '%$profName%'],
+      );
+    }
+
+
     List<Lesson> lessons = [];
     for (var map in maps) {
       lessons.add(Lesson.fromLocalMap(map));

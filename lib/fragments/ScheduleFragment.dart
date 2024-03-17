@@ -152,7 +152,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
           Container(
             height: 614,
             child: FutureBuilder<List<Lesson>>(
-              future: LessonsDatabase.getLessonsOnDate(_selectedDate),
+              future: LessonsDatabase.getLessonsOnDate(_selectedDate, _selectedGroup),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
