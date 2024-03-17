@@ -104,7 +104,7 @@ class LessonsDatabase {
         whereArgs: ['$dateString%', '%$groupName%'],
       );
     } else{
-      String profName ='${(await ProfessorDatabase.getProfessorById(id)).lastName} ${(await ProfessorDatabase.getProfessorById(id)).firstName} ${(await ProfessorDatabase.getProfessorById(id)).middleName}';
+      String profName ='${(await ProfessorDatabase.getProfessorById(id)).lastName}';//todo если будет проблема, искать тут
        maps = await db.query(
         tableName,
         where: 'date LIKE ? AND professors like ?',

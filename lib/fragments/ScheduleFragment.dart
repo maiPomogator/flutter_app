@@ -150,9 +150,10 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
             ),
           ),
           Container(
-            height: 614,
+            height: MediaQuery.of(context).size.height * 0.65,
             child: FutureBuilder<List<Lesson>>(
-              future: LessonsDatabase.getLessonsOnDate(_selectedDate, _selectedGroup),
+              future: LessonsDatabase.getLessonsOnDate(
+                  _selectedDate, _selectedGroup),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
@@ -186,7 +187,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                               Padding(
                                 padding: EdgeInsets.only(left: 16),
                                 child: Text(
-                                  '${DateFormat('HH:mm').format(snapshot.data![index].timeStart)} - ${DateFormat('HH:mm').format(snapshot.data![index].timeEnd)}',
+                                  '${DateFormat('HH:mm').format(snapshot.data![index].timeStart)} - ${DateFormat('HH:mm').format((snapshot.data![index].timeStart).add(Duration(hours: 1, minutes: 30)))}',
                                 ),
                               ),
                               Spacer(),
@@ -222,6 +223,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                             ),
                             margin: EdgeInsets.symmetric(horizontal: 18),
                             padding: EdgeInsets.all(12),
+                            width: double.infinity,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -394,11 +396,11 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
         ),
       );
       // Добавляем запись с isMain == true в selected
-    /*  if (isMain) {
+      /*  if (isMain) {
         mainSelectedValue = dropdownValue;
       }*/
     }
-   /* if (mainSelectedValue.isNotEmpty) {
+    /* if (mainSelectedValue.isNotEmpty) {
       _onGroupChanged(
           mainSelectedValue); // Устанавливаем запись с isMain == true в выбранные
     }*/
