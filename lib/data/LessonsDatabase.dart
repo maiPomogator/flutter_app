@@ -84,7 +84,7 @@ class LessonsDatabase {
       return null;
     }
 
-    return Lesson.fromMap(maps.first);
+    return Lesson.fromLocalMap(maps.first);
   }
 
   static Future<List<Lesson>> getLessonsOnDate(

@@ -82,6 +82,16 @@ class NoteDatabase {
     return _extractNotesFromMapList(maps);
   }
 
+  Future<List<Note>> getNotesWithLessonIdOnDate(DateTime date) async {
+    final formattedDate = date.toIso8601String().substring(0, 10);
+    final List<Map<String, dynamic>> maps = await _database.query(
+      'notes',
+      where: 'lessonId IS NOT NULL AND substr(targetTimestamp, 1, 10) = ?',
+      whereArgs: [formattedDate],
+    );
+    return _extractNotesFromMapList(maps);
+  }
+
   Future<List<Note>> getNotesWithoutLessonId() async {
     final List<Map<String, dynamic>> maps = await _database.query(
       'notes',

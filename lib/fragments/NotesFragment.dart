@@ -253,7 +253,7 @@ class _NotesFragmentState extends State<NotesFragment> {
               FutureBuilder<List<Note>>(
                 future: selectedType == NoteType.DAY
                     ? noteDatabase.getNotesByDate(_selectedDate)
-                    : noteDatabase.getNotesWithLessonId(),
+                    : noteDatabase.getNotesWithLessonIdOnDate(_selectedDate),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return CircularProgressIndicator();

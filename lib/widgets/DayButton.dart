@@ -21,9 +21,10 @@ class DayButton extends StatefulWidget {
 }
 
 class _DayButtonState extends State<DayButton> {
-  bool haveImportant = false;
+
   @override
   Widget build(BuildContext context) {
+    bool haveImportant = false;
     bool isSelected = widget.selectedDate.weekday == widget.date.weekday;
     bool isToday = DateTime.now().day == widget.date.day;
     if(widget.importantNotes!=null){

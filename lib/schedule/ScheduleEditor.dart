@@ -60,10 +60,11 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                 children: [
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15),
-                    child: const Icon(
-                      Icons.accessible,
+                    child:Image.asset(
+                      'assets/notes/important.png',
                       color: Colors.white,
-                      size: 33,
+                      width: 33,
+                      height: 33,
                     ),
                   ),
                   Column(
@@ -172,7 +173,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                   child: Center(
                     child: Text(
                       'Найти расписание',
-                      style: AppTextStyle.headerTextStyle(context),
+                      style: AppTextStyle.scheduleHeader(context),
                     ),
                   ),
                 ),
