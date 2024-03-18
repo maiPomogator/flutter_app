@@ -239,11 +239,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                                       ),
                                     );
                                   },
-                                  child: ImageIcon(
-                                    AssetImage(
-                                        'assets/navigation/note_icon.png'),
-                                    size: 24,
-                                  ),
+                                  child: const Icon(Icons.edit, size: 24,),
                                 ),
                               ),
                             ],

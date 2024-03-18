@@ -16,8 +16,9 @@ class ScheduleEditor extends StatefulWidget {
 }
 
 class _ScheduleEditorState extends State<ScheduleEditor> {
-  late Future<String> mainScheduleName;
-  late Future<List<String>> favoriteScheduleNames;
+  late Future<Map<String, dynamic>> mainScheduleName;
+  late Future<List<Map<String, dynamic>>> favoriteScheduleNames;
+  bool onEditing = false;
   final mainNavigationRoute =
       MaterialPageRoute(builder: (context) => FirstChoiceScreen());
 
@@ -38,14 +39,32 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(
-          'Избранное расписание',
-          style: AppTextStyle.headerTextStyle(context),
-        ),
-        centerTitle: true,
+        title: Row(children: [
+          Spacer(),
+          Text(
+            'Избранное расписание',
+            style: AppTextStyle.headerTextStyle(context),
+          ),
+          Spacer(),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: !onEditing
+                ? IconButton(
+                    icon: Icon(Icons.edit),
+                    iconSize: 16,
+                    onPressed: () {
+                      setState(() {
+                        onEditing = true;
+                      });
+                    },
+                  )
+                : Container(),
+          ),
+        ]),
+        centerTitle: false,
       ),
       body: Padding(
-        padding: EdgeInsets.only(left: 16, right: 16),
+        padding: const EdgeInsets.only(left: 16, right: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -70,7 +89,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         height: 16,
                       ),
                       Text(
@@ -86,38 +105,79 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                 ],
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 16,
             ),
             Text(
               'Основное расписание',
               style: AppTextStyle.headerTextStyle(context),
             ),
-            FutureBuilder<String>(
-              future: mainScheduleName,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Text('Ошибка при получении данных');
-                } else if (snapshot.connectionState == ConnectionState.done) {
-                  return Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Color(0xFF21212114),
-                            width: 1.0,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        snapshot.data ?? 'Нет выбранного',
-                        style: AppTextStyle.mainTextStyle(context),
-                      ));
-                } else {
-                  return Container();
-                }
-              },
-            ),
+            FutureBuilder<List<Map<String, dynamic>>>(
+                future: favoriteScheduleNames,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('Ошибка при получении данных');
+                  } else if (snapshot.connectionState == ConnectionState.done) {
+                    List<Map<String, dynamic>> schedules = snapshot.data ?? [];
+
+                    return FutureBuilder<Map<String, dynamic>>(
+                      future: mainScheduleName,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Text('Ошибка при получении данных');
+                        } else if (snapshot.connectionState ==
+                            ConnectionState.done) {
+                          return Container(
+                              height: 30,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: Color(0xFF21212114),
+                                    width: 1.0,
+                                  ),
+                                ),
+                              ),
+                              child: Row(children: [
+                                Text(
+                                  snapshot.data!['name'] ?? 'Нет выбранного',
+                                  style: AppTextStyle.mainTextStyle(context),
+                                ),
+                                Spacer(),
+                                onEditing
+                                    ? IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            ScheduleList.instance.deleteList(
+                                                snapshot.data!['id'],
+                                                snapshot.data!['type']);
+                                            if (schedules.isNotEmpty) {
+                                              ScheduleList.instance
+                                                  .updateIsMainByScheduleId(
+                                                schedules[1]['schedule_id'],
+                                                true,
+                                              );
+                                            }
+                                            mainScheduleName =
+                                                getMainScheduleName();
+                                            favoriteScheduleNames =
+                                                getScheduleList();
+                                          });
+                                        },
+                                        icon: Icon(Icons.close),
+                                        iconSize: 24,
+                                      )
+                                    : Container(),
+                              ]));
+                        } else {
+                          return Container();
+                        }
+                      },
+                    );
+                  } else {
+                    return Container();
+                  }
+                }),
             Padding(
               padding: EdgeInsets.only(top: 16),
               child: Text(
@@ -126,7 +186,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
               ),
             ),
             Expanded(
-              child: FutureBuilder<List<String>>(
+              child: FutureBuilder<List<Map<String, dynamic>>>(
                 future: favoriteScheduleNames,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
@@ -137,6 +197,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                       itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
                         return Container(
+                          height: 30,
                           width: double.infinity,
                           decoration: BoxDecoration(
                             border: Border(
@@ -146,10 +207,30 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                               ),
                             ),
                           ),
-                          child: Text(
-                            snapshot.data![index],
-                            style: AppTextStyle.mainTextStyle(context),
-                          ),
+                          child: Row(children: [
+                            Text(
+                              snapshot.data![index]['name'],
+                              style: AppTextStyle.mainTextStyle(context),
+                            ),
+                            Spacer(),
+                            onEditing
+                                ? IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        ScheduleList.instance.deleteList(
+                                            snapshot.data![index]['id'],
+                                            snapshot.data![index]['type']);
+                                        mainScheduleName =
+                                            getMainScheduleName();
+                                        favoriteScheduleNames =
+                                            getScheduleList();
+                                      });
+                                    },
+                                    icon: Icon(Icons.close),
+                                    iconSize: 24,
+                                  )
+                                : Container(),
+                          ]),
                         );
                       },
                     );
@@ -162,7 +243,13 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 25, horizontal: 16),
               child: GestureDetector(
-                onTap: onFindTapped,
+                onTap: onEditing
+                    ? () {
+                        setState(() {
+                          onEditing = false;
+                        });
+                      }
+                    : onFindTapped,
                 child: Container(
                   width: double.infinity,
                   height: 44,
@@ -172,7 +259,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                   ),
                   child: Center(
                     child: Text(
-                      'Найти расписание',
+                      onEditing ? 'Сохранить изменения' : 'Найти расписание',
                       style: AppTextStyle.scheduleHeader(context),
                     ),
                   ),
@@ -185,43 +272,67 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
     );
   }
 
-  Future<String> getMainScheduleName() async {
+  Future<Map<String, dynamic>> getMainScheduleName() async {
+    Map<String, dynamic> mainMap;
     if (ScheduleList.instance.mainSchedule != null) {
       if (ScheduleList.instance.mainSchedule!['type'] == 'group') {
         final group = await GroupDatabaseHelper.getGroupById(
             ScheduleList.instance.mainSchedule!['schedule_id']);
-        return group.name;
+        mainMap = {
+          'name': group.name,
+          'id': ScheduleList.instance.mainSchedule!['schedule_id'],
+          'type': 'group'
+        };
+        return mainMap;
       } else {
         final professor = await ProfessorDatabase.getProfessorById(
             ScheduleList.instance.mainSchedule!['schedule_id']);
-        return '${professor.lastName} ${professor.firstName} ${professor.middleName}';
+        mainMap = {
+          'name':
+              '${professor.lastName} ${professor.firstName} ${professor.middleName}',
+          'id': ScheduleList.instance.mainSchedule!['schedule_id'],
+          'type': 'professor'
+        };
+        return mainMap;
       }
     } else {
-      return "Нет выбранного";
+      return mainMap = ({'name': "Нет выбранного"});
     }
   }
 
-  Future<List<String>> getScheduleList() async {
+  Future<List<Map<String, dynamic>>> getScheduleList() async {
     List<Map<String, dynamic>> scheduleList = [];
     List<Map<String, dynamic>> notMain =
         await ScheduleList.instance.getScheduleList();
 
     for (int i = 0; i < notMain.length; i++) {
       if (notMain[i]['isMain'] != 1) {
-        scheduleList.add(notMain[i]);
+        scheduleList.add({
+          'schedule_id': notMain[i]['schedule_id'],
+          'type': notMain[i]['type']
+        });
       }
     }
-    List<String> scheduleString = [];
+    List<Map<String, dynamic>> scheduleString = [];
     for (int i = 0; i < scheduleList.length; i++) {
       if (scheduleList[i]['type'] == 'group') {
         Group group = await GroupDatabaseHelper.getGroupById(
             scheduleList[i]['schedule_id']);
-        scheduleString.add(group.name);
+        scheduleString.add({
+          'name': group.name,
+          'id': scheduleList[i]['schedule_id'],
+          'type': scheduleList[i]['type']
+        });
       } else {
         Professor professor = await ProfessorDatabase.getProfessorById(
             scheduleList[i]['schedule_id']);
-        scheduleString.add(
-            '${professor.middleName} ${professor.firstName} ${professor.lastName}');
+
+        scheduleString.add({
+          'name':
+              '${professor.middleName} ${professor.firstName} ${professor.lastName}',
+          'id': scheduleList[i]['schedule_id'],
+          'type': scheduleList[i]['type']
+        });
       }
     }
     return scheduleString;
