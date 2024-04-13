@@ -258,6 +258,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
   }
 
   Future<void> showBackupOptions(BuildContext context) async {
+    Permission.storage.request();
     if (await Permission.storage.request().isGranted) {
       // Разрешение на запись файлов получено
       return showDialog<void>(
@@ -271,14 +272,14 @@ class _SettingsFragmentState extends State<SettingsFragment> {
                 children: <Widget>[
                   ElevatedButton(
                     onPressed: () {
-                      JsonBackup.readJson();
+                      JsonBackup.readJson(context);
                       Navigator.of(context).pop();
                     },
                     child: const Text('Импорт'),
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      JsonBackup.generateJson();
+                      JsonBackup.generateJson(context);
                       Navigator.of(context).pop();
                     },
                     child: const Text('Экспорт'),
@@ -304,6 +305,8 @@ class _SettingsFragmentState extends State<SettingsFragment> {
                       'Для использования функции резервного копирования необходимо разрешение на запись файлов.'),
                   const Text(
                       'Пожалуйста, предоставьте приложению необходимое разрешение.'),
+                  const Text(
+                      'В случае непоявления окна запроса, предоставьте разрешение через настройки устройства'),
                 ],
               ),
             ),

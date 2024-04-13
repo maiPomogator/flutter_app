@@ -170,9 +170,10 @@ class _NotesFragmentState extends State<NotesFragment> {
                             onPressed: () {
                               onCreatePressed();
                             },
-                            icon: ImageIcon(
-                              AssetImage('assets/navigation/note_icon.png'),
+                            icon: Icon(
+                              Icons.edit,
                               size: 24,
+                                color: Color(0xFF2C4A60)
                             ),
                           ),
                     IconButton(

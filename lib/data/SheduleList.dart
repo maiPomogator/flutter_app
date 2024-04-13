@@ -73,12 +73,12 @@ class ScheduleList {
       return null;
     }
   }
-  Future<int> updateIsMainByScheduleId(int scheduleId, bool isMain) async {
+  Future<int> updateIsMainByScheduleId(int scheduleId, String type, bool isMain) async {
     return await _database.update(
       'schedule_list',
       {'isMain': isMain ? 1 : 0},
-      where: 'schedule_id = ?',
-      whereArgs: [scheduleId],
+      where: 'schedule_id = ? and type=?',
+      whereArgs: [scheduleId, type],
     );
   }
 

@@ -1,9 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_mobile_client/data/UserPreferences.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -13,45 +13,53 @@ import 'LessonsDatabase.dart';
 import 'NoteDatabase.dart';
 
 class JsonBackup {
-  static Future<void> generateJson() async {
-    String filePath = '/storage/emulated/0/Download/notes_backup.json';
-    try {
-      List<Note> allNotes = await NoteDatabase.instance.getNotes();
-      List<Map<String, dynamic>> notesJson =
-          allNotes.map((note) => note.toMap()).toList();
 
-      Map<String, dynamic> additionalInfo = {
-        'otherValue': UserPreferences.getMainType(),
-      };
+  static Future<void> generateJson(BuildContext context) async {
 
-      Map<String, dynamic> jsonData = {
-        'notes': notesJson,
-        'additionalInfo': additionalInfo,
-      };
+    String? downloadPath = (await getExternalStorageDirectories(type: StorageDirectory.downloads))?.first.path;
+    String formattedDate = DateFormat('dd_MM_yy_HH:mm').format(DateTime.now());
+    if (downloadPath!=null) {
+      String filePath = "$downloadPath/notes_backup_$formattedDate.json";
+      try {
+        List<Note> allNotes = await NoteDatabase.instance.getNotes();
+        List<Map<String, dynamic>> notesJson =
+        allNotes.map((note) => note.toMap()).toList();
 
-      String jsonContent = jsonEncode(jsonData);
+        Map<String, dynamic> additionalInfo = {
+        //  'theme': UserPreferences.getMainType(),
+        };
 
-      // Получение директории загрузок
-      Directory? downloadsDirectory = await getExternalStorageDirectory();
-      String downloadsPath = downloadsDirectory!.path;
+        Map<String, dynamic> jsonData = {
+          'notes': notesJson,
+          'additionalInfo': additionalInfo,
+        };
 
-      File file = File(filePath);
+        String jsonContent = jsonEncode(jsonData);
 
-      // Проверка разрешения на запись файлов
-      bool permissionStatus = await Permission.storage.isGranted;
-      if (!permissionStatus) {
-        // Если разрешение не предоставлено, запросите его и верните
-        await Permission.storage.request();
-        return;
+        File file = File(filePath);
+
+        // Проверка разрешения на запись файлов
+        bool permissionStatus = await Permission.storage.isGranted;
+        if (!permissionStatus) {
+          await Permission.storage.request();
+          return;
+        }
+
+        await file.writeAsString(jsonContent);
+        final snackBar = SnackBar(
+          content: Text('File saved in $downloadPath/notes_backup_$formattedDate.json'),
+          duration: const Duration(seconds: 2),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      } catch (e) {
+        print('Ошибка при сохранении JSON: $e');
       }
+    } else {
 
-      await file.writeAsString(jsonContent);
-    } catch (e) {
-      print('Ошибка при сохранении JSON: $e');
     }
   }
 
-  static Future<void> readJson() async {
+  static Future<void> readJson(BuildContext context) async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -89,6 +97,11 @@ class JsonBackup {
         for (var note in notes) {
           await NoteDatabase.instance.insertNote(note);
         }
+        const snackBar = SnackBar(
+          content: Text('Данные успешно добавлены'),
+          duration: Duration(seconds: 2),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
         return;
       } else {
         return;

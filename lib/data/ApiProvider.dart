@@ -54,9 +54,11 @@ class ApiProvider {
       final response = await http.get(
         Uri.parse('$baseUrl/mai/groups?course=$course&faculty=$faculty'),
       );
-      String source = Utf8Decoder().convert(response.bodyBytes);
-      print(source);
+
       if (response.statusCode == 200) {
+        String source = Utf8Decoder().convert(response.bodyBytes);
+        print(source);
+
         final List<dynamic> jsonData = jsonDecode(source);
         final List<Group> groups = jsonData.map((json) {
           return Group(
@@ -67,15 +69,20 @@ class ApiProvider {
             type: GroupType.fromString(json['type']),
           );
         }).toList();
+
         _attempted = false;
         return groups;
       } else {
-        throw Exception(
-            'Failed to load data fetchGroupsByCourseAndFac: ${response.statusCode}');
+        print('Failed to load data fetchGroupsByCourseAndFac: ${response.statusCode}');
+        if (_attempted) {
+          startFetchingPeriodically(fetchAllGroups);
+        } else {
+          _attempted = true;
+        }
+        return [];
       }
     } catch (e) {
-      print(
-          'Error occurred: $e address $baseUrl/mai/groups?course=$course&faculty=$faculty');
+      print('Error occurred: $e address $baseUrl/mai/groups?course=$course&faculty=$faculty');
       if (_attempted) {
         startFetchingPeriodically(fetchAllGroups);
       } else {
@@ -84,6 +91,7 @@ class ApiProvider {
       return [];
     }
   }
+
 
   static Future<Group> fetchGroupById(int id) async {
     try {
@@ -147,6 +155,8 @@ class ApiProvider {
       final scheduleList = await ScheduleList.instance.getScheduleList();
       for (int i = 0; i < scheduleList.length; i++) {
         if (scheduleList[i]['type'] == 'group') {
+          print('$baseUrl/mai/groups/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate');
+
           final response = await http.get(Uri.parse(
               '$baseUrl/mai/groups/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate'));
           String source = Utf8Decoder().convert(response.bodyBytes);
@@ -160,6 +170,8 @@ class ApiProvider {
                 'Failed to load data fetchLessonByGroup: ${response.statusCode}');
           }
         } else {
+          print('$baseUrl/mai/professors/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate');
+
           final response = await http.get(Uri.parse(
               '$baseUrl/mai/professors/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate'));
           String source = Utf8Decoder().convert(response.bodyBytes);
@@ -176,7 +188,7 @@ class ApiProvider {
       }
     } catch (e) {
       print(
-          'Error occurred in fetchAllSchedule: $e address $baseUrl/mai/groups//lessons');
+          'Error occurred in fetchAllSchedule: $e address $baseUrl/mai/groups/lessons');
       if (_attempted) {
         startFetchingPeriodically(() => fetchAllSchedule());
       } else {

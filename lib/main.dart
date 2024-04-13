@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_mobile_client/FirstChoiceScreen.dart';
@@ -60,7 +61,7 @@ class _MyAppState extends State<MyApp> {
       case 'Светлая':
         return ThemeData.light();
       default:
-        // Системная тема
+      // Системная тема
         return ThemeData();
     }
   }
@@ -68,12 +69,13 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'МАИ',
       theme: _themeData,
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'МАИ'),
     );
   }
 }
+
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});

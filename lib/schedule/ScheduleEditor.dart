@@ -21,10 +21,12 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
   bool onEditing = false;
   final mainNavigationRoute =
       MaterialPageRoute(builder: (context) => FirstChoiceScreen());
+  late Future<String> mainValue;
 
   @override
   void initState() {
     super.initState();
+    mainValue = getMainValue();
     mainScheduleName = getMainScheduleName();
     favoriteScheduleNames = getScheduleList();
   }
@@ -63,7 +65,17 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
         ]),
         centerTitle: false,
       ),
-      body: Padding(
+      body: FutureBuilder<String>(
+          future: mainValue,
+          builder: (context, snapshot) {
+
+            if (snapshot.hasError) {
+              return Text(
+                  'Произошла непредвиденная ошибка');
+            } else if (snapshot.connectionState ==
+                ConnectionState.done) {
+              String localMainValue = snapshot.data!;
+           return Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,7 +105,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                         height: 16,
                       ),
                       Text(
-                        'Настрой рапсисание',
+                        'Настрой расписание',
                         style: AppTextStyle.settingsMain(context),
                       ),
                       Text(
@@ -139,6 +151,21 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                                 ),
                               ),
                               child: Row(children: [
+                                onEditing
+                                    ? Radio<String>(
+                                        value: generateChooseString(
+                                            int.parse(snapshot.data!['id']
+                                                .toString()),
+                                            snapshot.data!['type']),
+                                        groupValue: localMainValue,
+                                        onChanged: (String? value) {
+                                          setState(() {
+                                            localMainValue = value!;
+                                            onSaveTapped(localMainValue);
+                                          });
+                                        },
+                                      )
+                                    : Container(),
                                 Text(
                                   snapshot.data!['name'] ?? 'Нет выбранного',
                                   style: AppTextStyle.mainTextStyle(context),
@@ -154,7 +181,8 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                                             if (schedules.isNotEmpty) {
                                               ScheduleList.instance
                                                   .updateIsMainByScheduleId(
-                                                schedules[1]['schedule_id'],
+                                                schedules[0]['schedule_id'],
+                                                schedules[0]['type'],
                                                 true,
                                               );
                                             }
@@ -208,6 +236,21 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                             ),
                           ),
                           child: Row(children: [
+                            onEditing
+                                ? Radio<String>(
+                                    value: generateChooseString(
+                                        int.parse(snapshot.data![index]['id']
+                                            .toString()),
+                                        snapshot.data![index]['type']),
+                                    groupValue: localMainValue,
+                                    onChanged: (String? value) {
+                                      setState(() {
+                                        localMainValue = value!;
+                                        onSaveTapped(localMainValue);
+                                      });
+                                    },
+                                  )
+                                : Container(),
                             Text(
                               snapshot.data![index]['name'],
                               style: AppTextStyle.mainTextStyle(context),
@@ -243,13 +286,8 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 25, horizontal: 16),
               child: GestureDetector(
-                onTap: onEditing
-                    ? () {
-                        setState(() {
-                          onEditing = false;
-                        });
-                      }
-                    : onFindTapped,
+                onTap: onEditing  ? () => onSaveTapped(localMainValue)
+                    : () => onFindTapped(),
                 child: Container(
                   width: double.infinity,
                   height: 44,
@@ -268,7 +306,12 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
             ),
           ],
         ),
-      ),
+      );
+            } else {
+              return Container();
+            }
+            }
+            ),
     );
   }
 
@@ -299,6 +342,35 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
       return mainMap = ({'name': "Нет выбранного"});
     }
   }
+
+  Future<String> getMainValue() async{
+    Map<String, dynamic> mainMap;
+    if (ScheduleList.instance.mainSchedule != null) {
+      if (ScheduleList.instance.mainSchedule!['type'] == 'group') {
+        final group = await GroupDatabaseHelper.getGroupById(
+            ScheduleList.instance.mainSchedule!['schedule_id']);
+        mainMap = {
+          'name': group.name,
+          'id': ScheduleList.instance.mainSchedule!['schedule_id'],
+          'type': 'group'
+        };
+       return  generateChooseString(mainMap['id'], mainMap['type']);
+      } else {
+        final professor = await ProfessorDatabase.getProfessorById(
+            ScheduleList.instance.mainSchedule!['schedule_id']);
+        mainMap = {
+          'name':
+          '${professor.lastName} ${professor.firstName} ${professor.middleName}',
+          'id': ScheduleList.instance.mainSchedule!['schedule_id'],
+          'type': 'professor'
+        };
+       return generateChooseString(mainMap['id'], mainMap['type']);
+      }
+    } else {
+      return 'нет такого';
+    }
+  }
+
 
   Future<List<Map<String, dynamic>>> getScheduleList() async {
     List<Map<String, dynamic>> scheduleList = [];
@@ -340,5 +412,42 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
 
   void onFindTapped() {
     Navigator.pushReplacement(context, mainNavigationRoute);
+  }
+
+  void updateScheduleList() {}
+
+  String generateChooseString(int id, String type) {
+    String response = '$id $type';
+    return response;
+  }
+
+  List<dynamic> getIdTypeFromString(String string) {
+    List<dynamic> response = [];
+    List<String> parts = string.split(" ");
+    String idString = parts[0];
+    int id = int.parse(idString);
+    String type = parts[1];
+    response.add(id);
+    response.add(type);
+    return response;
+  }
+
+  void onSaveTapped(String localMainValue) async {
+    Map<String, dynamic> mainSchedule = await getMainScheduleName();
+    List<dynamic> newChoice = getIdTypeFromString(localMainValue);
+
+    await ScheduleList.instance.updateIsMainByScheduleId(
+        mainSchedule['id'], mainSchedule['type'], false);
+    await ScheduleList.instance
+        .updateIsMainByScheduleId(newChoice[0], newChoice[1], true);
+    ScheduleList.instance.getMainScheduleIntoVar();
+    mainScheduleName =
+        getMainScheduleName();
+    favoriteScheduleNames =
+        getScheduleList();
+
+    setState(() {
+      onEditing = false;
+    });
   }
 }

@@ -223,8 +223,48 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                                 ),
                               ),
                               Spacer(),
+                              FutureBuilder<List<Note>>(
+                                future: NoteDatabase.instance
+                                    .getNotesByLesson(snapshot.data![index].id),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData &&
+                                      snapshot.data!.isNotEmpty) {
+                                    return Container(
+                                        constraints: BoxConstraints(
+                                          maxWidth: 200,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(20.0),
+                                            bottomLeft: Radius.circular(20.0),
+                                          ),
+                                          color: snapshot.data![index].color,
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.only(left: 3),
+                                          child: Flexible(
+                                            child: Text(
+                                              snapshot.data![index].title,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                              style: TextStyle(
+                                                  color: snapshot.data![index]
+                                                              .color ==
+                                                          Color(0xFFE9EEF3)
+                                                      ? Colors.black
+                                                      : Colors.white),
+                                            ),
+                                          ),
+                                        ));
+                                  } else {
+                                    return Container();
+                                  }
+                                },
+                              ),
                               Padding(
-                                padding: EdgeInsets.only(right: 10),
+                                padding: EdgeInsets.only(
+                                  right: 10,
+                                ),
                                 child: GestureDetector(
                                   onTap: () {
                                     Navigator.push(
@@ -239,7 +279,10 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                                       ),
                                     );
                                   },
-                                  child: const Icon(Icons.edit, size: 24,),
+                                  child: const Icon(
+                                    Icons.edit,
+                                    size: 24,
+                                  ),
                                 ),
                               ),
                             ],

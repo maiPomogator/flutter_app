@@ -149,9 +149,9 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
                                 });
                               },
                               child: Container(
-                                decoration: BoxDecoration(color: Colors.blue),
-                                width: 120,
+                                width: MediaQuery.of(context).size.width * 0.6,
                                 height: 40,
+                                decoration: BoxDecoration(color: Colors.blue),
                                 child: Center(
                                   child: Text(
                                     "Выбрать группу",
@@ -197,7 +197,7 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
                 },
                 child: Container(
                     decoration: BoxDecoration(color: Colors.blue),
-                    width: 120,
+                    width: MediaQuery.of(context).size.width * 0.6,
                     height: 40,
                     child: Center(
                         child: Text(
@@ -276,7 +276,7 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
                               },
                               child: Container(
                                 decoration: BoxDecoration(color: Colors.blue),
-                                width: 120,
+                                width: MediaQuery.of(context).size.width * 0.6,
                                 height: 40,
                                 child: Center(
                                   child: Text(
