@@ -9,8 +9,8 @@ import '../data/GroupDatabaseHelper.dart';
 import '../model/Group.dart';
 
 class ScheduleEditor extends StatefulWidget {
-  ScheduleEditor();
-
+  final Function() onUpdate;
+  ScheduleEditor({ required this.onUpdate,});
   @override
   _ScheduleEditorState createState() => _ScheduleEditorState();
 }
@@ -163,6 +163,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                                             localMainValue = value!;
                                             onSaveTapped(localMainValue);
                                           });
+                                          widget.onUpdate();
                                         },
                                       )
                                     : Container(),
@@ -191,6 +192,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                                             favoriteScheduleNames =
                                                 getScheduleList();
                                           });
+                                          widget.onUpdate();
                                         },
                                         icon: Icon(Icons.close),
                                         iconSize: 24,
@@ -209,7 +211,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
             Padding(
               padding: EdgeInsets.only(top: 16),
               child: Text(
-                'Избранное расписание',
+                'Выбранное расписание',
                 style: AppTextStyle.headerTextStyle(context),
               ),
             ),
@@ -248,6 +250,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                                         localMainValue = value!;
                                         onSaveTapped(localMainValue);
                                       });
+                                      widget.onUpdate();
                                     },
                                   )
                                 : Container(),
@@ -267,6 +270,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                                             getMainScheduleName();
                                         favoriteScheduleNames =
                                             getScheduleList();
+                                        widget.onUpdate();
                                       });
                                     },
                                     icon: Icon(Icons.close),
@@ -401,7 +405,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
 
         scheduleString.add({
           'name':
-              '${professor.middleName} ${professor.firstName} ${professor.lastName}',
+              '${professor.lastName} ${professor.firstName} ${professor.middleName}',
           'id': scheduleList[i]['schedule_id'],
           'type': scheduleList[i]['type']
         });
@@ -440,13 +444,15 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
         mainSchedule['id'], mainSchedule['type'], false);
     await ScheduleList.instance
         .updateIsMainByScheduleId(newChoice[0], newChoice[1], true);
-    ScheduleList.instance.getMainScheduleIntoVar();
-    mainScheduleName =
-        getMainScheduleName();
-    favoriteScheduleNames =
-        getScheduleList();
-
+    await ScheduleList.instance.getMainScheduleIntoVar();
+    widget.onUpdate();
+    print(await getMainScheduleName());
     setState(() {
+      mainValue = getMainValue();
+      mainScheduleName =
+          getMainScheduleName();
+      favoriteScheduleNames =
+          getScheduleList();
       onEditing = false;
     });
   }

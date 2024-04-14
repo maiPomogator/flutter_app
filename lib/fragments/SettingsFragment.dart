@@ -22,16 +22,18 @@ class _SettingsFragmentState extends State<SettingsFragment> {
   String _selectedTheme = UserPreferences.getTheme() == null
       ? 'Светлая'
       : UserPreferences.getTheme()!;
+  late Future<String> mainValue;
 
   @override
   void initState() {
+    mainValue = getMainScheduleName();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
-      future: getMainScheduleName(),
+      future: mainValue,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasError) {
@@ -159,7 +161,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ScheduleEditor(),
+            builder: (context) => ScheduleEditor(onUpdate: updateName),
           ),
         );
         break;
@@ -314,5 +316,10 @@ class _SettingsFragmentState extends State<SettingsFragment> {
         },
       );
     }
+  }
+  void updateName() {
+    setState(() {
+      mainValue = getMainScheduleName();
+    });
   }
 }
