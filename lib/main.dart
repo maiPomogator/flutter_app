@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_mobile_client/FirstChoiceScreen.dart';
@@ -10,6 +9,7 @@ import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
 import 'data/LocalDataBaseUpdater.dart';
 import 'data/SheduleList.dart';
 import 'data/UserPreferences.dart';
+import 'errors/LoggerService.dart';
 
 Future<void> main() async {
   //debugPaintSizeEnabled = true;
@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
       case 'Светлая':
         return ThemeData.light();
       default:
-      // Системная тема
+        // Системная тема
         return ThemeData();
     }
   }
@@ -75,7 +75,6 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -97,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return CircularProgressIndicator();
         } else if (snapshot.hasError) {
-          print('Ошибка: ${snapshot.error}');
+          LoggerService.logError('Ошибка: ${snapshot.error}');
           return Text('Ошибка: ${snapshot.error}');
         } else {
           if (_currentIndex == 0 && snapshot.data! > 0) {

@@ -5,6 +5,7 @@ import 'package:flutter_mobile_client/data/SheduleList.dart';
 import 'package:flutter_mobile_client/model/Professor.dart';
 import 'package:http/http.dart' as http;
 
+import '../errors/LoggerService.dart';
 import '../model/Group.dart';
 import '../model/GroupType.dart';
 import '../model/Lesson.dart';
@@ -38,7 +39,7 @@ class ApiProvider {
             'Failed to load data fetchAllGroups: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e address $baseUrl/mai/groups');
+      LoggerService.logError('Error occurred: $e address $baseUrl/mai/groups');
       if (_attempted) {
         startFetchingPeriodically(fetchAllGroups);
       } else {
@@ -57,7 +58,7 @@ class ApiProvider {
 
       if (response.statusCode == 200) {
         String source = Utf8Decoder().convert(response.bodyBytes);
-        print(source);
+        LoggerService.logInfo(source);
 
         final List<dynamic> jsonData = jsonDecode(source);
         final List<Group> groups = jsonData.map((json) {
@@ -69,11 +70,11 @@ class ApiProvider {
             type: GroupType.fromString(json['type']),
           );
         }).toList();
-
+        groups.sort((a, b) => a.name.compareTo(b.name));
         _attempted = false;
         return groups;
       } else {
-        print('Failed to load data fetchGroupsByCourseAndFac: ${response.statusCode}');
+        LoggerService.logError('Failed to load data fetchGroupsByCourseAndFac: ${response.statusCode}');
         if (_attempted) {
           startFetchingPeriodically(fetchAllGroups);
         } else {
@@ -82,7 +83,7 @@ class ApiProvider {
         return [];
       }
     } catch (e) {
-      print('Error occurred: $e address $baseUrl/mai/groups?course=$course&faculty=$faculty');
+      LoggerService.logError('Error occurred: $e address $baseUrl/mai/groups?course=$course&faculty=$faculty');
       if (_attempted) {
         startFetchingPeriodically(fetchAllGroups);
       } else {
@@ -106,7 +107,7 @@ class ApiProvider {
             'Failed to load data groupById: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e address $baseUrl/mai/groups/$id');
+      LoggerService.logError('Error occurred: $e address $baseUrl/mai/groups/$id');
       if (_attempted) {
         startFetchingPeriodically(() => fetchGroupById(id));
       } else {
@@ -135,15 +136,15 @@ class ApiProvider {
             'Failed to load data fetchLessonByGroup: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e address $baseUrl/mai/groups/$id/lessons');
+      LoggerService.logError('Error occurred: $e address $baseUrl/mai/groups/$id/lessons');
       if (_attempted) {
         startFetchingPeriodically(() => fetchLessonByGroup(id));
       } else {
         _attempted = true;
       }
     }
-    print('length of lessons ${lessons.length}');
-    print(lessons.toString());
+    LoggerService.logInfo('length of lessons ${lessons.length}');
+    LoggerService.logInfo(lessons.toString());
     return lessons;
   }
 
@@ -155,7 +156,7 @@ class ApiProvider {
       final scheduleList = await ScheduleList.instance.getScheduleList();
       for (int i = 0; i < scheduleList.length; i++) {
         if (scheduleList[i]['type'] == 'group') {
-          print('$baseUrl/mai/groups/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate');
+          LoggerService.logInfo('$baseUrl/mai/groups/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate');
 
           final response = await http.get(Uri.parse(
               '$baseUrl/mai/groups/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate'));
@@ -170,7 +171,7 @@ class ApiProvider {
                 'Failed to load data fetchLessonByGroup: ${response.statusCode}');
           }
         } else {
-          print('$baseUrl/mai/professors/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate');
+          LoggerService.logInfo('$baseUrl/mai/professors/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate');
 
           final response = await http.get(Uri.parse(
               '$baseUrl/mai/professors/${scheduleList[i]['schedule_id']}/lessons?startDate=$startDate&endDate=$endDate'));
@@ -187,7 +188,7 @@ class ApiProvider {
         }
       }
     } catch (e) {
-      print(
+      LoggerService.logError(
           'Error occurred in fetchAllSchedule: $e address $baseUrl/mai/groups/lessons');
       if (_attempted) {
         startFetchingPeriodically(() => fetchAllSchedule());
@@ -195,8 +196,8 @@ class ApiProvider {
         _attempted = true;
       }
     }
-    print('length of lessons ${lessons.length}');
-    print(lessons.toString());
+    LoggerService.logInfo('length of lessons ${lessons.length}');
+    LoggerService.logInfo(lessons.toString());
     return lessons;
   }
 
@@ -205,7 +206,7 @@ class ApiProvider {
       final response = await http.get(Uri.parse('$baseUrl/mai/professors'));
       if (response.statusCode == 200) {
         String source = Utf8Decoder().convert(response.bodyBytes);
-        print(jsonDecode(source));
+        LoggerService.logInfo(jsonDecode(source));
         final List<dynamic> jsonData = jsonDecode(source);
         final List<Professor> professors = jsonData.map((json) {
           return Professor(
@@ -223,7 +224,7 @@ class ApiProvider {
             'Failed to load data fetchAllGroups: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e address $baseUrl/mai/groups');
+      LoggerService.logError('Error occurred: $e address $baseUrl/mai/groups');
       if (_attempted) {
         startFetchingPeriodically(fetchAllGroups);
       } else {
@@ -246,7 +247,7 @@ class ApiProvider {
             'Failed to load data groupById: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e address $baseUrl/mai/professors/{$id}');
+      LoggerService.logError('Error occurred: $e address $baseUrl/mai/professors/{$id}');
       if (_attempted) {
         startFetchingPeriodically(() => fetchProfessorById(id));
       } else {
@@ -274,15 +275,15 @@ class ApiProvider {
             'Failed to load data fetchLessonByGroup: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e address $baseUrl/mai/groups/$id/lessons');
+      LoggerService.logError('Error occurred: $e address $baseUrl/mai/groups/$id/lessons');
       if (_attempted) {
         startFetchingPeriodically(() => fetchLessonByGroup(id));
       } else {
         _attempted = true;
       }
     }
-    print('length of lessons ${lessons.length}');
-    print(lessons.toString());
+    LoggerService.logInfo('length of lessons ${lessons.length}');
+    LoggerService.logInfo(lessons.toString());
     return lessons;
   }
 

@@ -10,6 +10,7 @@ import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../errors/LoggerService.dart';
 import '../main.dart';
 import '../schedule/ScheduleEditor.dart';
 
@@ -55,7 +56,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
                 Padding(
                   padding: EdgeInsets.only(top: 24),
                   child: buildSettingsItem(
-                    'star',
+                    Icons.star,
                     'Избранное расписания',
                     mainScheduleName!,
                   ),
@@ -63,7 +64,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
                 Padding(
                   padding: EdgeInsets.only(top: 16),
                   child: buildSettingsItem(
-                    'theme',
+                    Icons.style_outlined,
                     'Тема',
                     _selectedTheme,
                   ),
@@ -71,7 +72,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
                 Padding(
                   padding: EdgeInsets.only(top: 16),
                   child: buildSettingsItem(
-                    'telegram',
+                    Icons.telegram,
                     'Привязать телеграм',
                     UserPreferences.getIsAuth() ? 'Привязано' : 'Не привязано',
                   ),
@@ -79,7 +80,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
                 Padding(
                   padding: EdgeInsets.only(top: 16),
                   child: buildSettingsItem(
-                    'backup',
+                    Icons.mobile_screen_share,
                     'Импорт/экспорт данных',
                     'Перенос данных между устройствами',
                   ),
@@ -111,7 +112,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
   }
 
   Widget buildSettingsItem(
-    String imageName,
+    IconData imageName,
     String title,
     String subtitle,
   ) {
@@ -132,7 +133,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
             SizedBox(
               width: 16,
             ),
-            Image.asset('assets/settings/$imageName.png'),
+            Icon(imageName, color: Color(0xFF2C4A60), size: 24),
             Padding(
               padding: EdgeInsets.only(left: 12, bottom: 15),
               child: Column(
@@ -155,9 +156,9 @@ class _SettingsFragmentState extends State<SettingsFragment> {
     );
   }
 
-  Future<void> handleButtonTap(String buttonName) async {
+  Future<void> handleButtonTap(IconData buttonName) async {
     switch (buttonName) {
-      case 'star':
+      case Icons.star:
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -165,15 +166,15 @@ class _SettingsFragmentState extends State<SettingsFragment> {
           ),
         );
         break;
-      case 'theme':
+      case Icons.style_outlined:
         showThemeOptions(context);
         break;
-      case 'telegram':
+      case Icons.telegram:
         final String botUserName = dotenv.env['BOT_NAME'] ?? '';
         Uri? url;
         String message = 'кал';
         try {
-          if (message != null && message != '') {
+          if (message != '') {
             url = Uri.parse('https://t.me/$botUserName?start=uuid');
           } else {
             url = Uri.parse('https://t.me/$botUserName');
@@ -190,19 +191,19 @@ class _SettingsFragmentState extends State<SettingsFragment> {
           );
           if (kDebugMode) {
             if (message != '') {
-              print(
+              LoggerService.logInfo(
                   '\x1B[32mSending message to $botUserName...\nMessage: $message\x1B[0m\nURL: https://t.me/$botUserName?text=${Uri.encodeFull(message)}');
             } else {
-              print('\x1B[32mSending message to $botUserName...\x1B[0m');
+              LoggerService.logInfo('\x1B[32mSending message to $botUserName...\x1B[0m');
             }
           }
         } catch (e) {
           if (kDebugMode) {
-            print('\x1B[31mSending failed!\nError: $e\x1B[0m');
+            LoggerService.logInfo('\x1B[31mSending failed!\nError: $e\x1B[0m');
           }
         }
         break;
-      case 'backup':
+      case Icons.mobile_screen_share:
         await showBackupOptions(context);
         break;
       default:
@@ -317,6 +318,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
       );
     }
   }
+
   void updateName() {
     setState(() {
       mainValue = getMainScheduleName();

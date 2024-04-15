@@ -6,6 +6,7 @@ import 'package:flutter_mobile_client/model/Lesson.dart';
 import 'package:flutter_mobile_client/model/NoteType.dart';
 import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 
+import '../errors/LoggerService.dart';
 import '../model/Note.dart';
 
 class NoteCreationDialog extends StatefulWidget {
@@ -182,7 +183,7 @@ class _NoteCreationDialogState extends State<NoteCreationDialog> {
   }
 
   void onSavePressed() async {
-    print('Кнопка "Сохранить" нажата');
+    LoggerService.logInfo('Кнопка "Сохранить" нажата');
     if (_labelFieldController.text.isNotEmpty &&
         _textFieldController.text.isNotEmpty) {
       Note newNote = Note(

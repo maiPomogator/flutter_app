@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../errors/LoggerService.dart';
 import '../model/Lesson.dart';
 import '../model/Note.dart';
 import 'LessonsDatabase.dart';
@@ -52,7 +53,7 @@ class JsonBackup {
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       } catch (e) {
-        print('Ошибка при сохранении JSON: $e');
+        LoggerService.logError('Ошибка при сохранении JSON: $e');
       }
     } else {
 
@@ -107,7 +108,7 @@ class JsonBackup {
         return;
       }
     } catch (e) {
-      print('Ошибка при чтении JSON: $e');
+      LoggerService.logError('Ошибка при чтении JSON: $e');
       return;
     }
   }

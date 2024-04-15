@@ -1,9 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mobile_client/MainScreen.dart';
 import 'package:flutter_mobile_client/data/ApiProvider.dart';
+import 'package:flutter_mobile_client/errors/LoggerService.dart';
 import 'package:flutter_mobile_client/model/Professor.dart';
-import 'package:levenshtein_distance/levenshtein_distance.dart';
-import 'dart:math';
 
 import 'data/LocalDataBaseUpdater.dart';
 import 'data/SheduleList.dart';
@@ -29,6 +30,7 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    checkInternetConnection(context);
     return Scaffold(
       body: Center(
         child: Column(
@@ -248,9 +250,7 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
                                       );
                                     }).toList(),
                                     onChanged: (int? professorId) {
-                                      setState(() {
                                         selectedProfessor = professorId;
-                                      });
                                     },
                                   );
                                 }
@@ -313,7 +313,7 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
   }
 
   Widget _buildDropdown(List<Group>? groups) {
-    print(groups);
+    LoggerService.logInfo(groups.toString());
     if (groups != null && groups.isNotEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -333,9 +333,7 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
               );
             }).toList(),
             onChanged: (String? value) {
-              setState(() {
-                dropdownGroupValue = value!;
-              });
+              dropdownGroupValue = value!;
             },
           ),
         ],
@@ -390,5 +388,18 @@ class _FirstChoiceScreenState extends State<FirstChoiceScreen> {
     }
 
     return bestMatches;
+  }
+
+  Future<void> checkInternetConnection(BuildContext context) async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {}
+    } on SocketException catch (_) {
+      const snackBar = SnackBar(
+        content: Text('Нет подключения к интернету'),
+        duration: Duration(seconds: 2),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
   }
 }

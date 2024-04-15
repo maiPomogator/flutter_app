@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'fragments/NotesFragment.dart';
 import 'fragments/ScheduleFragment.dart';
@@ -13,6 +15,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    checkInternetConnection(context);
     double baseWidth = 1280;
     double fem = MediaQuery.of(context).size.width / baseWidth;
     return Scaffold(
@@ -24,9 +27,9 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
-          _buildNavItem('assets/navigation/schedule_icon.png', 'Расписание', 0),
-          _buildNavItem('assets/navigation/note_icon.png', 'Заметки', 1),
-          _buildNavItem('assets/navigation/settings_icon.png', 'Настройки', 2),
+          _buildNavItem(Icons.calendar_month, 'Расписание', 0),
+          _buildNavItem(Icons.note_alt_outlined, 'Заметки', 1),
+          _buildNavItem(Icons.settings, 'Настройки', 2),
         ],
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
@@ -59,7 +62,8 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  BottomNavigationBarItem _buildNavItem(String icon, String label, int index) {
+  BottomNavigationBarItem _buildNavItem(
+      IconData icon, String label, int index) {
     bool isSelected = index == _currentIndex;
     return BottomNavigationBarItem(
       icon: Container(
@@ -69,12 +73,25 @@ class _MainScreenState extends State<MainScreen> {
           color: isSelected ? const Color(0xFF2C4A60) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Image.asset(
+        child: Icon(
           icon,
           color: isSelected ? Colors.white : const Color(0xFF2C4A60),
         ),
       ),
       label: label,
     );
+  }
+
+  Future<void> checkInternetConnection(BuildContext context) async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {}
+    } on SocketException catch (_) {
+      const snackBar = SnackBar(
+        content: Text('Нет подключения к интернету'),
+        duration: Duration(seconds: 2),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
   }
 }

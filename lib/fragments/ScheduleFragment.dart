@@ -8,6 +8,7 @@ import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import '../errors/LoggerService.dart';
 import '../model/Group.dart';
 import '../model/Lesson.dart';
 import '../model/Note.dart';
@@ -101,6 +102,9 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
             height: 35,
             child: Row(
               children: [
+                SizedBox(
+                  width: 10,
+                ),
                 Text(
                   DateFormat('d MMMM', 'ru').format(currentDate),
                   style: AppTextStyle.secondTextStyle(context),
@@ -238,17 +242,17 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                                             topLeft: Radius.circular(20.0),
                                             bottomLeft: Radius.circular(20.0),
                                           ),
-                                          color: snapshot.data![index].color,
+                                          color: snapshot.data![0].color,
                                         ),
                                         child: Padding(
                                           padding: EdgeInsets.only(left: 3),
                                           child: Flexible(
                                             child: Text(
-                                              snapshot.data![index].title,
+                                              snapshot.data![0].title,
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 1,
                                               style: TextStyle(
-                                                  color: snapshot.data![index]
+                                                  color: snapshot.data![0]
                                                               .color ==
                                                           Color(0xFFE9EEF3)
                                                       ? Colors.black
@@ -282,6 +286,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                                   child: const Icon(
                                     Icons.edit,
                                     size: 24,
+                                    color: Color(0xFF2C4A60),
                                   ),
                                 ),
                               ),
@@ -399,7 +404,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                 .subtract(Duration(days: _selectedDate.weekday - 1))
                 .add(Duration(days: index)));
       });
-      print("Selected date: $_selectedDate");
+      LoggerService.logInfo("Selected date: $_selectedDate");
     }
   }
 

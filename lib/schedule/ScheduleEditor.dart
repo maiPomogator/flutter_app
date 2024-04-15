@@ -105,11 +105,11 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
                         height: 16,
                       ),
                       Text(
-                        'Настрой расписание',
+                        'Настройте расписание',
                         style: AppTextStyle.settingsMain(context),
                       ),
                       Text(
-                        'Основное будет отображено в меню,\nизбранное - в быстром доступе поиска',
+                        'Основное будет отображено в меню,\nизбранное — в быстром доступе поиска',
                         style: AppTextStyle.settingsSecond(context),
                       ),
                     ],
@@ -446,7 +446,6 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
         .updateIsMainByScheduleId(newChoice[0], newChoice[1], true);
     await ScheduleList.instance.getMainScheduleIntoVar();
     widget.onUpdate();
-    print(await getMainScheduleName());
     setState(() {
       mainValue = getMainValue();
       mainScheduleName =

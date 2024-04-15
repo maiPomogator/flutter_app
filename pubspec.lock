@@ -168,14 +168,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.19.0"
-  levenshtein_distance:
-    dependency: "direct main"
-    description:
-      name: levenshtein_distance
-      sha256: a845a3fdc5b521fd45d6833cfd174c5b6456b004408548523ad639815c37dc54
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   lints:
     dependency: transitive
     description:
@@ -184,6 +176,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  logger:
+    dependency: "direct main"
+    description:
+      name: logger
+      sha256: "8c94b8c219e7e50194efc8771cd0e9f10807d8d3e219af473d89b06cc2ee4e04"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
   matcher:
     dependency: transitive
     description:

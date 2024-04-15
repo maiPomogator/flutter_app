@@ -1,6 +1,7 @@
 import 'package:flutter_mobile_client/data/GroupDatabaseHelper.dart';
 import 'package:flutter_mobile_client/data/LessonsDatabase.dart';
 import 'package:flutter_mobile_client/data/ProfessorDatabase.dart';
+import 'package:flutter_mobile_client/errors/LoggerService.dart';
 import 'package:flutter_mobile_client/model/Group.dart';
 import 'package:flutter_mobile_client/model/Professor.dart';
 
@@ -21,7 +22,7 @@ class LocalDatabaseHelper {
       populateLessonDatabaseFromServerByGroup(response);
       GroupDatabaseHelper.insertGroup(response);
     } catch (e) {
-      print('Error occurred while populateGroupDatabaseFromServerById: $e');
+      LoggerService.logError('Error occurred while populateGroupDatabaseFromServerById: $e');
     }
   }
 
@@ -32,8 +33,8 @@ class LocalDatabaseHelper {
         await LessonsDatabase.insertLesson(lesson);
       }
     } catch (e, stackTrace) {
-      print('Error occurred while populating lesson database from server: $e');
-      print('Stack trace: $stackTrace');
+      LoggerService.logError('Error occurred while populating lesson database from server: $e');
+      LoggerService.logError('Stack trace: $stackTrace');
     }
   }
 
@@ -44,8 +45,8 @@ class LocalDatabaseHelper {
         await LessonsDatabase.insertLesson(lesson);
       }
     } catch (e, stackTrace) {
-      print('Error occurred while populating lesson database from server: $e');
-      print('Stack trace: $stackTrace');
+      LoggerService.logError('Error occurred while populating lesson database from server: $e');
+      LoggerService.logError('Stack trace: $stackTrace');
     }
   }
 
@@ -55,7 +56,7 @@ class LocalDatabaseHelper {
       populateLessonDatabaseFromServerByProfessor(response);
       ProfessorDatabase.insertProfessor(response);
     } catch (e) {
-      print('Error occurred while populateProfessorDatabaseFromServerById: $e');
+      LoggerService.logError('Error occurred while populateProfessorDatabaseFromServerById: $e');
     }
   }
 
@@ -68,9 +69,9 @@ class LocalDatabaseHelper {
         await LessonsDatabase.insertLesson(lesson);
       }
     } catch (e, stackTrace) {
-      print(
+      LoggerService.logError(
           'Error occurred while populateLessonDatabaseFromServerByProfessor: $e');
-      print('Stack trace: $stackTrace');
+      LoggerService.logError('Stack trace: $stackTrace');
     }
   }
 }

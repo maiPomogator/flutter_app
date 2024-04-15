@@ -6,6 +6,7 @@ import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
+import '../errors/LoggerService.dart';
 import '../model/Note.dart';
 import '../notes/NoteCreationDialog.dart';
 import '../widgets/DayButton.dart';
@@ -392,7 +393,7 @@ class _NotesFragmentState extends State<NotesFragment> {
   }
 
   void onCreatePressed() {
-    print('Кнопка "Создать" нажата');
+    LoggerService.logInfo('Кнопка "Создать" нажата');
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -433,7 +434,7 @@ class _NotesFragmentState extends State<NotesFragment> {
                 .subtract(Duration(days: _selectedDate.weekday - 1))
                 .add(Duration(days: index)));
       });
-      print("Selected date: $_selectedDate");
+      LoggerService.logInfo("Selected date: $_selectedDate");
     }
   }
 

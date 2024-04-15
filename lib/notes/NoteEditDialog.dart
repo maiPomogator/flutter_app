@@ -4,6 +4,7 @@ import 'package:flutter_mobile_client/data/NoteDatabase.dart';
 import 'package:flutter_mobile_client/errors/ErrorDialog.dart';
 import 'package:flutter_mobile_client/styles/AppTextStyle.dart';
 
+import '../errors/LoggerService.dart';
 import '../model/Note.dart';
 
 class NoteEditDialog extends StatefulWidget {
@@ -213,7 +214,7 @@ class _NoteEditDialogState extends State<NoteEditDialog> {
   }
 
   void onSavePressed() async {
-    print('Кнопка "Сохранить" нажата');
+    LoggerService.logInfo('Кнопка "Сохранить" нажата');
     await NoteDatabase.instance.deleteNote(widget.note.id);
     if (_labelFieldController.text.isNotEmpty &&
         _textFieldController.text.isNotEmpty) {

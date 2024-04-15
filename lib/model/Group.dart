@@ -1,3 +1,4 @@
+import 'package:flutter_mobile_client/errors/LoggerService.dart';
 import 'package:flutter_mobile_client/model/GroupType.dart';
 
 class Group {
@@ -40,7 +41,7 @@ class Group {
 
       return group;
     } catch (e) {
-      print('Ошибка при парсинге типа группы: $e');
+      LoggerService.logError('Ошибка при парсинге типа группы: $e');
       throw Exception('Ошибка при создании группы из карты: $e');
     }
   }
