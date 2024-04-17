@@ -38,7 +38,7 @@ class _DayButtonState extends State<DayButton> {
     }
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4),
+      margin: EdgeInsets.symmetric(horizontal: 2),
       width: 30,
       decoration: BoxDecoration(
         border: isToday

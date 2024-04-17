@@ -186,7 +186,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
             ),
           ),
           Container(
-            height: MediaQuery.of(context).size.height * 0.65,
+            height: MediaQuery.of(context).size.height * 0.7,
             child: FutureBuilder<List<Lesson>>(
               future: LessonsDatabase.getLessonsOnDate(
                   _selectedDate, _selectedGroup),
@@ -228,38 +228,34 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
                               ),
                               Spacer(),
                               FutureBuilder<List<Note>>(
-                                future: NoteDatabase.instance
-                                    .getNotesByLesson(snapshot.data![index].id),
+                                future: NoteDatabase.instance.getNotesByLesson(snapshot.data![index].id),
                                 builder: (context, snapshot) {
-                                  if (snapshot.hasData &&
-                                      snapshot.data!.isNotEmpty) {
+                                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                                     return Container(
-                                        constraints: BoxConstraints(
-                                          maxWidth: 200,
+                                      constraints: BoxConstraints(
+                                        maxWidth: 200,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(20.0),
+                                          bottomLeft: Radius.circular(20.0),
                                         ),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(20.0),
-                                            bottomLeft: Radius.circular(20.0),
+                                        color: snapshot.data![0].color,
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.only(left: 3),
+                                        child: Text(
+                                          snapshot.data![0].title,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                          style: TextStyle(
+                                            color: snapshot.data![0].color == Color(0xFFE9EEF3)
+                                                ? Colors.black
+                                                : Colors.white,
                                           ),
-                                          color: snapshot.data![0].color,
                                         ),
-                                        child: Padding(
-                                          padding: EdgeInsets.only(left: 3),
-                                          child: Flexible(
-                                            child: Text(
-                                              snapshot.data![0].title,
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                              style: TextStyle(
-                                                  color: snapshot.data![0]
-                                                              .color ==
-                                                          Color(0xFFE9EEF3)
-                                                      ? Colors.black
-                                                      : Colors.white),
-                                            ),
-                                          ),
-                                        ));
+                                      ),
+                                    );
                                   } else {
                                     return Container();
                                   }
@@ -360,7 +356,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
         child: Padding(
           padding: EdgeInsets.only(top: 8),
           child: Text(
-            'Сегодня занятий нет - можно и отдохнуть',
+            'Сегодня занятий нет — можно и отдохнуть',
             style: AppTextStyle.mainTextStyle(context),
           ),
         ),
@@ -413,7 +409,7 @@ class _ScheduleFragmentState extends State<ScheduleFragment> {
       future: _buildDropdownItems(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return Container(height: 48,);
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {

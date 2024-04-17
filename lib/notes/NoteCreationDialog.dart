@@ -170,7 +170,7 @@ class _NoteCreationDialogState extends State<NoteCreationDialog> {
                   child: Center(
                     child: Text(
                       'Сохранить',
-                      style: AppTextStyle.headerTextStyle(context),
+                      style: TextStyle(color: Colors.black),
                     ),
                   ),
                 ),

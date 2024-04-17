@@ -262,91 +262,80 @@ class _NotesFragmentState extends State<NotesFragment> {
                   } else {
                     return snapshot.hasData && snapshot.data!.isNotEmpty
                         ? SingleChildScrollView(
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: snapshot.data?.length ?? 0,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                    padding: EdgeInsets.only(top: 10),
-                                    child: GestureDetector(
-                                        onTap: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return NoteEditDialog(
-                                                  currentDate: _selectedDate,
-                                                  note: snapshot.data![index],
-                                                  onUpdate: updateNotes);
-                                            },
-                                          );
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: snapshot.data![index].color,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                          ),
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: 18),
-                                          padding: EdgeInsets.all(12),
-                                          child: Row(
+                      child: Column(
+                        children: [
+                          ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: snapshot.data?.length ?? 0,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: EdgeInsets.only(top: 10),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return NoteEditDialog(
+                                          currentDate: _selectedDate,
+                                          note: snapshot.data![index],
+                                          onUpdate: updateNotes,
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: snapshot.data![index].color,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    margin: EdgeInsets.symmetric(horizontal: 18),
+                                    padding: EdgeInsets.all(12),
+                                    child: Row(
+                                      children: [
+                                        snapshot.data![index].isImportant
+                                            ? Image.asset(
+                                          'assets/notes/important.png',
+                                          color: snapshot.data![index].color == Color(0xFFE9EEF3)
+                                              ? Color(0xFF2C4A60)
+                                              : Colors.white,
+                                        )
+                                            : Container(),
+                                        Container(
+                                          margin: EdgeInsets.only(left: 10),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              snapshot.data![index].isImportant
-                                                  ? Image.asset(
-                                                      'assets/notes/important.png',
-                                                      color: snapshot
-                                                                  .data![index]
-                                                                  .color ==
-                                                              Color(0xFFE9EEF3)
-                                                          ? Color(0xFF2C4A60)
-                                                          : Colors.white,
-                                                    )
-                                                  : Container(),
-                                              Container(
-                                                  margin:
-                                                      EdgeInsets.only(left: 10),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        snapshot
-                                                            .data![index].title,
-                                                        style: TextStyle(
-                                                            color: snapshot
-                                                                        .data![
-                                                                            index]
-                                                                        .color ==
-                                                                    Color(
-                                                                        0xFFE9EEF3)
-                                                                ? Colors.black
-                                                                : Colors.white),
-                                                      ),
-                                                      SizedBox(
-                                                        height: 10 * fem,
-                                                      ),
-                                                      Text(
-                                                        snapshot
-                                                            .data![index].text,
-                                                        style: TextStyle(
-                                                            color: snapshot
-                                                                        .data![
-                                                                            index]
-                                                                        .color ==
-                                                                    Color(
-                                                                        0xFFE9EEF3)
-                                                                ? Colors.black
-                                                                : Colors.white),
-                                                      )
-                                                    ],
-                                                  ))
+                                              Text(
+                                                snapshot.data![index].title,
+                                                style: TextStyle(
+                                                  color: snapshot.data![index].color == Color(0xFFE9EEF3)
+                                                      ? Colors.black
+                                                      : Colors.white,
+                                                ),
+                                              ),
+                                              SizedBox(height: 10 * fem),
+                                              Text(
+                                                snapshot.data![index].text,
+                                                style: TextStyle(
+                                                  color: snapshot.data![index].color == Color(0xFFE9EEF3)
+                                                      ? Colors.black
+                                                      : Colors.white,
+                                                ),
+                                              ),
                                             ],
                                           ),
-                                        )));
-                              },
-                            ),
-                          )
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          Container(height: MediaQuery.of(context).size.height * (1 - snapshot.data!.length * 0.25),)
+                        ],
+                      ),
+                    )
                         : noNotes();
                   }
                 },
@@ -364,7 +353,7 @@ class _NotesFragmentState extends State<NotesFragment> {
           child: Image.asset('assets/notes/note_image.png'),
         ),
         Text(
-          'Заметок пока нет - можешь их создать',
+          'Заметок пока нет — можете их создать',
           style: AppTextStyle.mainTextStyle(context),
         ),
         Padding(

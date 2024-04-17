@@ -206,7 +206,7 @@ class ApiProvider {
       final response = await http.get(Uri.parse('$baseUrl/mai/professors'));
       if (response.statusCode == 200) {
         String source = Utf8Decoder().convert(response.bodyBytes);
-        LoggerService.logInfo(jsonDecode(source));
+        LoggerService.logInfo(jsonDecode(source).toString());
         final List<dynamic> jsonData = jsonDecode(source);
         final List<Professor> professors = jsonData.map((json) {
           return Professor(

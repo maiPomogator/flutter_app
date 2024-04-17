@@ -183,7 +183,7 @@ class _NoteEditDialogState extends State<NoteEditDialog> {
                       child: Center(
                         child: Text(
                           'Сохранить',
-                          style: AppTextStyle.headerTextStyle(context),
+                          style: TextStyle(color: Colors.black),
                         ),
                       ),
                     ),
@@ -201,7 +201,7 @@ class _NoteEditDialogState extends State<NoteEditDialog> {
                       child: Center(
                         child: Text(
                           'Удалить',
-                          style: AppTextStyle.headerTextStyle(context),
+                          style: TextStyle(color: Colors.black),
                         ),
                       ),
                     ),

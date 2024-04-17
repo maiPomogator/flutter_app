@@ -48,7 +48,7 @@ class JsonBackup {
 
         await file.writeAsString(jsonContent);
         final snackBar = SnackBar(
-          content: Text('File saved in $downloadPath/notes_backup_$formattedDate.json'),
+          content: Text('Файл сохранен в $downloadPath/notes_backup_$formattedDate.json'),
           duration: const Duration(seconds: 2),
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);

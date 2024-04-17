@@ -57,7 +57,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
                   padding: EdgeInsets.only(top: 24),
                   child: buildSettingsItem(
                     Icons.star,
-                    'Избранное расписания',
+                    'Избранное расписание',
                     mainScheduleName!,
                   ),
                 ),
@@ -261,10 +261,10 @@ class _SettingsFragmentState extends State<SettingsFragment> {
   }
 
   Future<void> showBackupOptions(BuildContext context) async {
-    Permission.storage.request();
-    if (await Permission.storage.request().isGranted) {
+    final status = await Permission.storage.request();
+    if (status.isGranted) {
       // Разрешение на запись файлов получено
-      return showDialog<void>(
+      showDialog<void>(
         context: context,
         barrierDismissible: true,
         builder: (BuildContext context) {
@@ -309,7 +309,7 @@ class _SettingsFragmentState extends State<SettingsFragment> {
                   const Text(
                       'Пожалуйста, предоставьте приложению необходимое разрешение.'),
                   const Text(
-                      'В случае непоявления окна запроса, предоставьте разрешение через настройки устройства'),
+                      'В случае, если окно запроса не появилось, предоставьте разрешение через настройки устройства'),
                 ],
               ),
             ),

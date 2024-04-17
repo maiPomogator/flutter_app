@@ -30,7 +30,12 @@ class LocalDatabaseHelper {
     try {
       List<Lesson> lessons = await ApiProvider.fetchLessonByGroup(group.id);
       for (Lesson lesson in lessons) {
-        await LessonsDatabase.insertLesson(lesson);
+        Lesson? existingLesson = await LessonsDatabase.getLessonById(lesson.id);
+        if (existingLesson != null) {
+          await LessonsDatabase.updateLesson(lesson);
+        } else {
+          await LessonsDatabase.insertLesson(lesson);
+        }
       }
     } catch (e, stackTrace) {
       LoggerService.logError('Error occurred while populating lesson database from server: $e');
@@ -38,17 +43,24 @@ class LocalDatabaseHelper {
     }
   }
 
+
   Future<void> populateAllLessonDatabase() async {
     try {
       List<Lesson> lessons = await ApiProvider.fetchAllSchedule();
       for (Lesson lesson in lessons) {
-        await LessonsDatabase.insertLesson(lesson);
+        Lesson? existingLesson = await LessonsDatabase.getLessonById(lesson.id);
+        if (existingLesson != null) {
+          await LessonsDatabase.updateLesson(lesson);
+        } else {
+          await LessonsDatabase.insertLesson(lesson);
+        }
       }
     } catch (e, stackTrace) {
       LoggerService.logError('Error occurred while populating lesson database from server: $e');
       LoggerService.logError('Stack trace: $stackTrace');
     }
   }
+
 
   Future<void> populateProfessorDatabaseFromServerById(int id) async {
     try {
@@ -64,9 +76,14 @@ class LocalDatabaseHelper {
       Professor professor) async {
     try {
       List<Lesson> lessons =
-          await ApiProvider.fetchLessonByProfessor(professor.id);
+      await ApiProvider.fetchLessonByProfessor(professor.id);
       for (Lesson lesson in lessons) {
-        await LessonsDatabase.insertLesson(lesson);
+        Lesson? existingLesson = await LessonsDatabase.getLessonById(lesson.id);
+        if (existingLesson != null) {
+          await LessonsDatabase.updateLesson(lesson);
+        } else {
+          await LessonsDatabase.insertLesson(lesson);
+        }
       }
     } catch (e, stackTrace) {
       LoggerService.logError(
@@ -74,4 +91,5 @@ class LocalDatabaseHelper {
       LoggerService.logError('Stack trace: $stackTrace');
     }
   }
+
 }

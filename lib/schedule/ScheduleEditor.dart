@@ -81,7 +81,6 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 352,
               height: 92,
               decoration: BoxDecoration(
                 color: Color(0xff2C4A60),
@@ -211,7 +210,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
             Padding(
               padding: EdgeInsets.only(top: 16),
               child: Text(
-                'Выбранное расписание',
+                'Выбранные расписания',
                 style: AppTextStyle.headerTextStyle(context),
               ),
             ),

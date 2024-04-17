@@ -123,4 +123,14 @@ class LessonsDatabase {
 
     return lessons;
   }
+
+  static Future<void> updateLesson(Lesson lesson) async {
+    final Database db = await database;
+    await db.update(
+      tableName,
+      lesson.toMap(),
+      where: 'id = ?',
+      whereArgs: [lesson.id],
+    );
+  }
 }
