@@ -229,7 +229,7 @@ class _NoteEditDialogState extends State<NoteEditDialog> {
               : selectedPriorityColor,
           false,
           _switchValue,
-          null);
+          widget.note.lesson);
       await NoteDatabase.instance.insertNote(newNote);
       Navigator.of(context).pop();
       widget.onUpdate();

@@ -29,7 +29,7 @@ class ApiProvider {
             name: json['name'],
             course: json['course'],
             faculty: json['faculty'],
-            type: GroupType.fromString(json['type']),
+            type: json['type'],
           );
         }).toList();
         _attempted = false;
@@ -67,7 +67,7 @@ class ApiProvider {
             name: json['name'],
             course: json['course'],
             faculty: json['faculty'],
-            type: GroupType.fromString(json['type']),
+            type: json['type'],
           );
         }).toList();
         groups.sort((a, b) => a.name.compareTo(b.name));

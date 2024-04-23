@@ -81,4 +81,24 @@ class AppTextStyle {
         color: Colors.white
     );
   }
+  static TextStyle headerNotes(Color color){
+    return TextStyle(
+      fontSize: 16,
+      fontFamily: 'Roboto',
+      fontWeight: FontWeight.w500,
+      color: color == Color(0xFFE9EEF3)
+          ? Colors.black
+          : Colors.white,
+    );
+  }
+  static TextStyle mainNotes(Color color){
+    return TextStyle(
+      fontSize: 16,
+      fontFamily: 'Roboto',
+      fontWeight: FontWeight.w400,
+      color: color == Color(0xFFE9EEF3)
+          ? Colors.black
+          : Colors.white,
+    );
+  }
 }

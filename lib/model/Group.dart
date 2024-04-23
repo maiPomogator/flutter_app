@@ -4,9 +4,9 @@ import 'package:flutter_mobile_client/model/GroupType.dart';
 class Group {
   final int id;
   final String name;
-  final int course;
-  final int faculty;
-  final GroupType type;
+  final int? course;
+  final int? faculty;
+  final String? type;
 
   Group({
     required this.id,
@@ -22,21 +22,19 @@ class Group {
       'name': name,
       'course': course,
       'faculty': faculty,
-      'type': type.toString(),
+      'type': type,
     };
   }
 
   factory Group.fromMap(Map<String, dynamic> map) {
-    GroupType? type;
     try {
-      type = GroupType.fromString(map['type']);
 
       Group group = Group(
         id: int.parse(map['id'].toString()),
         name: map['name'],
         course: int.parse(map['course'].toString()),
         faculty: int.parse(map['faculty'].toString()),
-        type: type,
+        type: map['type'],
       );
 
       return group;
